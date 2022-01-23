@@ -73,7 +73,13 @@ public class SimmandManager {
         }
     }
 
+    /**
+     * 获取所有可用的指令Key
+     *
+     * @return 指令Key集
+     */
     public Set<String> allKey() {
         return simmandMap.keySet();
     }
+
 }

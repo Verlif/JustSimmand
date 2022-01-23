@@ -69,6 +69,7 @@ public class Simmand {
         }
         this.object = o;
         this.method = method;
+        this.method.setAccessible(true);
         // 设置指令名
         if (simmOption == null || simmOption.value().length == 0) {
             key = new String[]{method.getName()};
@@ -168,10 +169,24 @@ public class Simmand {
             objects[j] = o;
         }
         try {
-            return method.invoke(object, objects).toString();
+            Object o = method.invoke(object, objects);
+            if (o == null) {
+                return null;
+            } else {
+                return o.toString();
+            }
         } catch (Exception e) {
+            e.printStackTrace();
             return e.getMessage();
         }
     }
 
+    /**
+     * 获取指令参数解析器
+     *
+     * @return 参数解析器，全局共享
+     */
+    public static ParamParserService getParamParserService() {
+        return PPS;
+    }
 }
