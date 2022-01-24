@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.github.Verlif</groupId>
             <artifactId>ParamParser</artifactId>
-            <version>alpha-0.1</version>
+            <version>alpha-0.2</version>
         </dependency>
     </dependencies>
 

@@ -18,7 +18,8 @@ public class Simmand {
     private static final String TAG_PARAM = "--";
     private static final String SPLIT_PARAM = " ";
 
-    private static final ParamParserService PPS = new ParamParserService();
+    private final ParamParserService pps;
+    private final SimmandConfig config;
 
     /**
      * 指令Key
@@ -56,6 +57,11 @@ public class Simmand {
      */
     private Map<Integer, Object> valueMap;
 
+    protected Simmand(ParamParserService service, SimmandConfig config) {
+        pps = service;
+        this.config = config;
+    }
+
     /**
      * 加载方法到此指令
      *
@@ -64,7 +70,8 @@ public class Simmand {
      */
     public boolean load(Object o, Method method) {
         SimmOption simmOption = method.getAnnotation(SimmOption.class);
-        if (simmOption != null && !simmOption.isCommand()) {
+        if (config.getLoadMode() == SimmandConfig.LoadMode.POSITIVE && simmOption != null && !simmOption.isCommand()
+                || config.getLoadMode() == SimmandConfig.LoadMode.NEGATIVE && simmOption == null) {
             return false;
         }
         this.object = o;
@@ -80,9 +87,9 @@ public class Simmand {
         Class<?>[] paramTypes = method.getParameterTypes();
         parserMap = new HashMap<>(paramTypes.length);
         for (int i = 0, size = paramTypes.length; i < size; i++) {
-            ParamParser<?> pp = PPS.getParser(paramTypes[i]);
+            ParamParser<?> pp = pps.getParser(paramTypes[i]);
             if (pp == null) {
-                pp = PPS.getParser(String.class);
+                pp = pps.getParser(String.class);
             }
             parserMap.put(i, pp);
         }
@@ -179,14 +186,5 @@ public class Simmand {
             e.printStackTrace();
             return e.getMessage();
         }
-    }
-
-    /**
-     * 获取指令参数解析器
-     *
-     * @return 参数解析器，全局共享
-     */
-    public static ParamParserService getParamParserService() {
-        return PPS;
     }
 }

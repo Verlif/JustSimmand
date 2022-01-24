@@ -38,8 +38,8 @@
 >    <dependencies>
 >        <dependency>
 >            <groupId>com.github.Verlif</groupId>
->            <artifactId>JustSimmand</artifactId>
->            <version>alpha-0.1</version>
+>            <artifactId>just-simmand</artifactId>
+>            <version>alpha-0.2</version>
 >        </dependency>
 >    </dependencies>
 > ```
@@ -47,7 +47,7 @@
 > Gradle
 > ```text
 > dependencies {
->   implementation 'com.github.Verlif:JustSimmand:alpha-0.1'
+>   implementation 'com.github.Verlif:just-simmand:alpha-0.2'
 > }
 > ```
 
@@ -92,8 +92,8 @@ hello Verlif
 如果方法中使用了 [参数解析器](https://github.com/Verlif/ParamParser) 中未定义的对象时，会抛出`IllegalArgumentException`异常，请使用以下方式添加对应解析器：
 
 ```java
-// 获取全局的参数解析器
-ParamParserService pps = Simmand.getParamParserService();
+// 获取指令管理器中的参数解析器
+ParamParserService pps = manager.getParamParserService();
 // 添加自己的参数解析器（在添加指令前使用，对之前添加的指令无效）
 pps.addOrReplace(new MyParser());
 
