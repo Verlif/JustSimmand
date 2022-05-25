@@ -1,4 +1,5 @@
 # JustSimmand
+
 指令生成器
 
 将任意的Java对象的方法转换成可以通过指令来执行的指令。  
@@ -12,44 +13,50 @@
 
 1. 添加Jitpack仓库源
 
-> maven
-> ```xml
-> <repositories>
->    <repository>
->        <id>jitpack.io</id>
->        <url>https://jitpack.io</url>
->    </repository>
-> </repositories>
-> ```
+   [![Release](https://jitpack.io/v/Verlif/just-simmand.svg)](https://jitpack.io/#Verlif/just-simmand)
 
-> Gradle
-> ```text
-> allprojects {
->   repositories {
->       maven { url 'https://jitpack.io' }
->   }
-> }
-> ```
+   1. maven
+   
+   ```xml
+   <repositories>
+      <repository>
+          <id>jitpack.io</id>
+          <url>https://jitpack.io</url>
+      </repository>
+   </repositories>
+   ```
+
+   2. Gradle
+   
+   ```text
+   allprojects {
+     repositories {
+         maven { url 'https://jitpack.io' }
+     }
+   }
+   ```
 
 2. 添加依赖
 
-> maven
-> ```xml
->    <dependencies>
->        <dependency>
->            <groupId>com.github.Verlif</groupId>
->            <artifactId>just-simmand</artifactId>
->            <version>alpha-0.2</version>
->        </dependency>
->    </dependencies>
-> ```
+   1. maven
+   
+   ```xml
+      <dependencies>
+          <dependency>
+              <groupId>com.github.Verlif</groupId>
+              <artifactId>just-simmand</artifactId>
+              <version>最新版本号</version>
+          </dependency>
+      </dependencies>
+   ```
 
-> Gradle
-> ```text
-> dependencies {
->   implementation 'com.github.Verlif:just-simmand:alpha-0.2'
-> }
-> ```
+   2. Gradle
+   
+   ```text
+   dependencies {
+     implementation 'com.github.Verlif:just-simmand:最新版本号'
+   }
+   ```
 
 3. 使用
 ```java
