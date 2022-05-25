@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 指令对象，由{@link SimmandManager}自动生成。
+ *
  * @author Verlif
  */
 public class Simmand {
@@ -114,6 +116,11 @@ public class Simmand {
         return true;
     }
 
+    /**
+     * 获取此指令对象的所有方法key。
+     *
+     * @return 此指令对象的所有加载的方法key，这些key都可以被识别。
+     */
     public String[] getKey() {
         return key;
     }
