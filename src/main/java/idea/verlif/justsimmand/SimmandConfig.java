@@ -14,12 +14,28 @@ public class SimmandConfig {
      */
     private LoadMode loadMode = LoadMode.POSITIVE;
 
+    /**
+     * 在添加指令对象时，已存在的相同指令是否被替换。true - 被替换；false - 不替换，跳过此指令加载。
+     */
+    private boolean addWithReplace = true;
+
     public LoadMode getLoadMode() {
         return loadMode;
     }
 
     public void setLoadMode(LoadMode loadMode) {
         this.loadMode = loadMode;
+    }
+
+    public boolean isAddWithReplace() {
+        return addWithReplace;
+    }
+
+    /**
+     * 在添加指令对象时，已存在的相同指令是否被替换。true - 被替换；false - 不替换，跳过此指令加载。
+     */
+    public void setAddWithReplace(boolean addWithReplace) {
+        this.addWithReplace = addWithReplace;
     }
 
     /**

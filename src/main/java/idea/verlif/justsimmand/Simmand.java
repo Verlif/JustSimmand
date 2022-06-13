@@ -130,7 +130,7 @@ public class Simmand {
      *
      * @return 指令返回值
      */
-    public String run(String line) {
+    public Object run(String line) {
         if (method == null) {
             return "No such command!!!";
         }
@@ -183,12 +183,7 @@ public class Simmand {
             objects[j] = o;
         }
         try {
-            Object o = method.invoke(object, objects);
-            if (o == null) {
-                return null;
-            } else {
-                return o.toString();
-            }
+            return method.invoke(object, objects);
         } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();

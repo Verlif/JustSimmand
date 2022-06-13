@@ -79,7 +79,9 @@ public class SimmandManager {
                 Simmand simmand = new Simmand(pps, config);
                 if (simmand.load(o, method)) {
                     for (String key : simmand.getKey()) {
-                        simmandMap.put(key, simmand);
+                        if (config.isAddWithReplace() || !simmandMap.containsKey(key)) {
+                            simmandMap.put(key, simmand);
+                        }
                     }
                 }
             }
@@ -91,9 +93,9 @@ public class SimmandManager {
      * 请注意编译时参数名会被屏蔽。
      *
      * @param line 指令行
-     * @return 指令结果
+     * @return 指令结果。执行成功则返回执行方法的返回对象，否则返回错误信息（String）。
      */
-    public String run(String line) {
+    public Object run(String line) {
         String[] ss = line.trim().split(SPLIT_PARAM, 2);
         // 判定参数
         switch (ss.length) {
