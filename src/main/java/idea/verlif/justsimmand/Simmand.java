@@ -5,6 +5,7 @@ import idea.verlif.justsimmand.anno.SimmParam;
 import idea.verlif.parser.ParamParser;
 import idea.verlif.parser.ParamParserService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
@@ -130,11 +131,10 @@ public class Simmand {
      *
      * @return 指令返回值
      */
-    public Object run(String line) {
+    public Object run(String line) throws InvocationTargetException, IllegalAccessException {
         if (method == null) {
             return "No such command!!!";
         }
-
         // 参数值表
         int size = valueMap.size();
         Map<Integer, Object> valueMap = new HashMap<>(size);
@@ -166,7 +166,6 @@ public class Simmand {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return "Something error: " + e.getMessage();
         }
         // 填充默认值
@@ -182,11 +181,6 @@ public class Simmand {
             }
             objects[j] = o;
         }
-        try {
-            return method.invoke(object, objects);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
+        return method.invoke(object, objects);
     }
 }

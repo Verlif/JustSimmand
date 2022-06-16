@@ -2,6 +2,7 @@ package idea.verlif.justsimmand;
 
 import idea.verlif.parser.ParamParserService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -95,7 +96,7 @@ public class SimmandManager {
      * @param line 指令行
      * @return 指令结果。执行成功则返回执行方法的返回对象，否则返回错误信息（String）。
      */
-    public Object run(String line) {
+    public Object run(String line) throws InvocationTargetException, IllegalAccessException {
         String[] ss = line.trim().split(SPLIT_PARAM, 2);
         // 判定参数
         switch (ss.length) {
