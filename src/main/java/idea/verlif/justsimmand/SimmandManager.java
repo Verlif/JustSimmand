@@ -75,7 +75,7 @@ public class SimmandManager {
      * @param pps    参数解析器
      */
     public void add(Object o, ParamParserService pps, SimmandConfig config) {
-        for (Method method : o.getClass().getDeclaredMethods()) {
+        for (Method method : o.getClass().getMethods()) {
             if ((method.getModifiers() & 1) > 0) {
                 Simmand simmand = new Simmand(pps, config);
                 if (simmand.load(o, method)) {

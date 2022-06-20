@@ -8,7 +8,9 @@ import idea.verlif.parser.ParamParserService;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -140,7 +142,7 @@ public class Simmand {
         Map<Integer, Object> valueMap = new HashMap<>(size);
         try {
             if (line != null) {
-                String[] paramSplit = line.trim().split(SPLIT_PARAM);
+                String[] paramSplit = split(line);
                 // 给定参数名的临时序号
                 Integer i = null;
                 // 未给定参数名的序号
@@ -182,5 +184,52 @@ public class Simmand {
             objects[j] = o;
         }
         return method.invoke(object, objects);
+    }
+
+    private String[] split(String str) {
+        char[] chars = str.toCharArray();
+        boolean in = false, ready = false, tran = false;
+        List<String> list = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for (char c : chars) {
+            if (in) {
+                if (c == '\"') {
+                    in = false;
+                    list.add(sb.toString());
+                    sb.setLength(0);
+                } else {
+                    sb.append(c);
+                    ready = true;
+                }
+            } else {
+                if (c == '\"') {
+                    if (tran) {
+                        sb.append(c);
+                        tran = false;
+                    } else {
+                        in = true;
+                        if (ready) {
+                            list.add(sb.toString());
+                            sb.setLength(0);
+                        }
+                    }
+                } else if (c == '\\') {
+                    tran = true;
+                } else if (c == ' ') {
+                    if (sb.length() > 0) {
+                        list.add(sb.toString());
+                    }
+                    ready = false;
+                    sb.setLength(0);
+                } else {
+                    sb.append(c);
+                    ready = true;
+                }
+            }
+        }
+        if (sb.length() > 0) {
+            list.add(sb.toString());
+        }
+        return list.toArray(new String[0]);
     }
 }
