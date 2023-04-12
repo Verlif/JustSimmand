@@ -1,5 +1,7 @@
 # JustSimmand
 
+中文 | [English](readme.md)
+
 `JustSimmand`，一个简单且直观的指令系统。
 
 在`JustSimmand`中，一个实例对象就是一个指令集，实例对象的每一个方法就是一条指令。

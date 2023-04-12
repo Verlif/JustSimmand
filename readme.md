@@ -1,5 +1,7 @@
 # JustSimmand
 
+[中文](readme_cn.md) | English
+
 `JustSimmand`, A simple and intuitive command system.
 
 on the `JustSimmand`, An instance object is an instruction set, and each method of an instance object is an instruction.
