@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SimmParam {
+public @interface SmdParam {
 
     /**
      * 参数名。<br/>
@@ -19,12 +19,17 @@ public @interface SimmParam {
      *
      * @return 用于在指令行识别的参数。
      */
-    String key() default "";
+    String value() default "";
+
+    /**
+     * 参数描述，用于说明此参数的作用与数值填写规则。
+     */
+    String description() default "";
 
     /**
      * 是否必填参数，默认true。
      *
-     * @return {@code true} - 必要参数，当参数未在指令行中指明时，则从默认值取值。若默认值未添加则指令执行失败。
+     * @return {@code true} - 必要参数，当参数未在指令行中指明时，则从默认值取值。若默认值未添加则抛出异常。<br>
      * {@code false} - 非必要参数，不对此参数进行空值校验。
      */
     boolean force() default true;

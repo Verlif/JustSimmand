@@ -1,13 +1,13 @@
 # JustSimmand
 
-`JustSimmand`, A simple and intuitive command system.
+`JustSimmand`，一个简单且直观的指令系统。
 
-on the `JustSimmand`, An instance object is an instruction set, and each method of an instance object is an instruction.
-No longer need to manually write call methods, just write instructions like Java code.
+在`JustSimmand`中，一个实例对象就是一个指令集，实例对象的每一个方法就是一条指令。
+不需要再手动写调用方法，只需要像写Java代码一样写指令即可。
 
-## Example
+## 举例
 
-There is a class for adding and squaring two numbers as follows:
+有如下一个类，用来做两数相加与求平方：
 
 ```java
 public class SimpleMath {
@@ -23,43 +23,42 @@ public class SimpleMath {
 }
 ```
 
-At this point we can call both methods by:
+此时我们可以通过以下方式来调用这两个方法：
 
 ```java
 public class MainTest {
     @Test
     public void simpleTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        // Instantiating instruction executors
+        // 实例化指令执行器
         SmdExecutor smdExecutor = new SmdExecutor();
-        // Load the object to the command executor and set the load mode to positive mode
+        // 加载对象到指令执行器，并设定加载模式为积极模式
         smdExecutor.add(new SimpleMath(), new LoadConfig()
                 .loadMode(LoadConfig.LoadMode.POSITIVE));
-        // Start execution method
+        // 开始执行方法
         System.out.println("plus : " + smdExecutor.run("SimpleMath plus 2 3"));
         System.out.println("square : " + smdExecutor.run("SimpleMath square 2"));
     }
 }
 ```
 
-Here the following output will be available:
+这里就会有以下输出：
 
 ```text
 plus : 5
 square : 4
 ```
 
-## Implement
+## 实现
 
-The base implementation is provided by Java reflection, where the object methods are deconstructed and adapted to the instruction execution system when the object is loaded,
-and can then be called in the instruction executor.
+基础实现是由Java反射提供的，在加载对象时将对象方法进行解构并适配指令执行系统，随后即可在指令执行器中调用。
 
-1. Parameter parsing scheme provided by [Parameter Parser](https://github.com/Verlif/ParamParser) for parsing strings into instances of classes corresponding to method parameters.
-2. The command parsing scheme is provided by [Line Command Parser](https://github.com/Verlif/cmdline-parser) for parsing the incoming commands.
-3. Reflection methods are provided by [Reflection Tools](https://github.com/Verlif/reflection-kit) for doing method resolution.
+1. 由 [参数解析器](https://github.com/Verlif/ParamParser) 提供参数解析方案，用于将字符串解析成方法参数对应的类实例。
+2. 由 [行命令解析器](https://github.com/Verlif/cmdline-parser) 提供指令解析方案，用于解析输入的指令。
+3. 由 [反射工具](https://github.com/Verlif/reflection-kit) 提供反射方法，用于做方法解析。
 
-## Advanced
+## 高级
 
-Of course, the above is only the basic usage, you can actually use it like this:
+当然，以上只是基础用法，实际上你可以这样使用：
 
 ```java
 @SmdClass(value = "math", description = "简单的测试指令")
@@ -80,30 +79,30 @@ public class Math {
 }
 ```
 
-- `SmdClass` Used to describe the command object information
-- `SmdOption` Giving command aliases and description information
-- `SmdParam` Specify parameter alias, default value, required or not, and parameter description
+- `SmdClass` 用于说明指令对象信息
+- `SmdOption` 给予指令别名与描述信息
+- `SmdParam` 指定参数别名、默认值、是否必填与参数描述
 
-And you can also use it like this:
+并且你也可以这样使用：
 
 ```java
 public class MainTest {
 
     @Test
     public void test() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        // Instantiating instruction executors
+        // 实例化指令执行器
         SmdExecutor smdExecutor = new SmdExecutor();
-        // Add command object
+        // 添加指令对象
         smdExecutor.add(new Math());
-        // Set the command prefix alias, here it means that typing "3" or "test" is equivalent to typing "math plus --b 4"
-        // The "--b" here means that the "4" that follows is part of the "b" parameter
+        // 设定指令前缀别名，这里表示输入 "3" 或 "test" 就相当于输入了 "math plus --b 4"
+        // 这里的 "--b" 表示后面的 "4" 是属于参数 "b" 的
         smdExecutor.addPrefixReplace("math plus --b 4", "3", "test");
-        // The command is called using an alias, where the default value of "0" is given because "a" is not a mandatory parameter and is a base type
+        // 使用别名进行指令调用，这里因为 "a" 并不是强制参数且是基础类型，所以会给予默认值 "0"
         System.out.println("使用指令前缀别名: " + smdExecutor.run("3"));
-        // Here again, there is no need to enter the value of "b" because it is set to a default value
+        // 这里同样因为 "b" 设定有默认值，所以也不需要输入 "b" 的值
         System.out.println("使用指令设定值: " + smdExecutor.run("math plus"));
         System.out.println("基础调用: " + smdExecutor.run("math ^ 2"));
-        // Output the help
+        // 输出help
         List<SmdInfo> run = (List<SmdInfo>) smdExecutor.run("help");
         for (SmdInfo smdInfo : run) {
             System.out.print(smdInfo);
@@ -112,7 +111,7 @@ public class MainTest {
 }
 ```
 
-The following is the output:
+以下是输出结果：
 
 ```text
 使用指令前缀别名: 4
@@ -130,16 +129,16 @@ math - 简单的测试指令
 		--[a]                 	null
 ```
 
-The output is rather sketchy and may be modified subsequently. Of course, developers can also implement their own **help** through reflection.
+**help**输出比较简陋，后续可能会修改。当然，开发者也可以通过反射实现自己的**help**。
 
-## Using
+## 使用方法
 
-1. Add Jitpack repository source
+1. 添加Jitpack仓库源
 
    last-version: [![Release](https://jitpack.io/v/Verlif/just-simmand.svg)](https://jitpack.io/#Verlif/just-simmand)
 
    Maven
-
+   
    ```xml
    <repositories>
       <repository>
@@ -150,7 +149,7 @@ The output is rather sketchy and may be modified subsequently. Of course, develo
    ```
 
    Gradle
-
+   
    ```text
    allprojects {
      repositories {
@@ -159,10 +158,10 @@ The output is rather sketchy and may be modified subsequently. Of course, develo
    }
    ```
 
-2. Adding dependencies
+2. 添加依赖
 
    Maven
-
+   
    ```xml
       <dependencies>
           <dependency>
@@ -174,7 +173,7 @@ The output is rather sketchy and may be modified subsequently. Of course, develo
    ```
 
    Gradle
-
+   
    ```text
    dependencies {
      implementation 'com.github.Verlif:just-simmand:last-version'

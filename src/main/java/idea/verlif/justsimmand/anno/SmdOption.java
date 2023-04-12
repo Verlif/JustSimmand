@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SimmOption {
+public @interface SmdOption {
 
     /**
      * 指令别名。
@@ -20,9 +20,14 @@ public @interface SimmOption {
     String[] value() default {};
 
     /**
-     * 是否是指令，默认true。
-     *
-     * @return {@code true} - 可被执行的指令方法；{@code false} - 此方法不会被指令所识别。
+     * 指令描述，用于说明此指令方法的作用与效果。
      */
-    boolean isCommand() default true;
+    String description() default "";
+
+    /**
+     * 是否忽略此方法作为指令加载，默认true。
+     *
+     * @return {@code true} - 忽略此方法；{@code false} - 不忽略此方法。
+     */
+    boolean ignored() default false;
 }
