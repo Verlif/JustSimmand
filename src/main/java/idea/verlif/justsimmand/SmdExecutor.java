@@ -3,8 +3,8 @@ package idea.verlif.justsimmand;
 import idea.verlif.justsimmand.anno.SmdClass;
 import idea.verlif.justsimmand.anno.SmdOption;
 import idea.verlif.justsimmand.anno.SmdParam;
+import idea.verlif.justsimmand.info.SmdGroupInfo;
 import idea.verlif.justsimmand.info.SmdMethodInfo;
-import idea.verlif.justsimmand.info.SmdInfo;
 import idea.verlif.parser.ParamParserService;
 import idea.verlif.parser.cmdline.ArgParser;
 import idea.verlif.parser.cmdline.ArgValues;
@@ -36,7 +36,7 @@ public class SmdExecutor extends ParamParserService {
     /**
      * 指令信息表。
      */
-    private final Map<String, SmdInfo> smdInfoMap;
+    private final Map<String, SmdGroupInfo> smdInfoMap;
 
     /**
      * 前缀替换表
@@ -59,9 +59,9 @@ public class SmdExecutor extends ParamParserService {
     private SimmandFactory simmandFactory;
 
     /**
-     * 指令参数解析器
+     * 参数解析器工厂类
      */
-    private ArgParser argParser;
+    private ArgParserFactory argParserFactory;
 
     public SmdExecutor() {
         simmandMap = new HashMap<>();
@@ -81,8 +81,8 @@ public class SmdExecutor extends ParamParserService {
         this.simmandFactory = simmandFactory;
     }
 
-    public void setArgParser(ArgParser argParser) {
-        this.argParser = argParser;
+    public void setArgParserFactory(ArgParserFactory argParserFactory) {
+        this.argParserFactory = argParserFactory;
     }
 
     /**
@@ -109,7 +109,7 @@ public class SmdExecutor extends ParamParserService {
         }
         Class<?> cla = o.getClass();
         // 新增指令信息
-        SmdInfo smdInfo = new SmdInfo();
+        SmdGroupInfo smdGroupInfo = new SmdGroupInfo();
         SmdClass smdClass = cla.getAnnotation(SmdClass.class);
         // 构造指令key
         String name;
@@ -119,9 +119,9 @@ public class SmdExecutor extends ParamParserService {
             name = smdClass.value();
         }
         // 构建指令信息
-        smdInfo.setKey(name);
+        smdGroupInfo.setKey(name);
         if (smdClass != null) {
-            smdInfo.setDescription(smdClass.description());
+            smdGroupInfo.setDescription(smdClass.description());
         }
         List<Method> allMethods = MethodUtil.getAllMethods(cla);
         List<SmdMethodInfo> smdMethodInfoList = new ArrayList<>();
@@ -145,8 +145,8 @@ public class SmdExecutor extends ParamParserService {
         }
         // 添加指令信息到信息表
         if (!smdMethodInfoList.isEmpty()) {
-            smdInfo.addSmdMethodInfo(smdMethodInfoList);
-            smdInfoMap.put(smdInfo.getKey(), smdInfo);
+            smdGroupInfo.addSmdMethodInfo(smdMethodInfoList);
+            smdInfoMap.put(smdGroupInfo.getKey(), smdGroupInfo);
         }
     }
 
@@ -168,33 +168,38 @@ public class SmdExecutor extends ParamParserService {
         }
         // 构建指令参数
         String[] ss = newLine.split(SPLIT_PARAM, 3);
+        String group = null;
         String methodName;
         String paramLine = "";
         if (ss.length == 1) {
             methodName = ss[0];
         } else if (ss.length == 2) {
-           if (smdConfig.isClassNameGroup()) {
-               methodName = ss[0] + SPLIT_PARAM + ss[1];
-           } else {
-               methodName = ss[0];
-               paramLine = ss[1];
-           }
+            if (smdConfig.isClassNameGroup()) {
+                group = ss[0];
+                methodName = ss[1];
+            } else {
+                methodName = ss[0];
+                paramLine = ss[1];
+            }
         } else {
             if (smdConfig.isClassNameGroup()) {
-                methodName = ss[0] + SPLIT_PARAM + ss[1];
+                group = ss[0];
+                methodName = ss[1];
                 paramLine = ss[2];
             } else {
                 methodName = ss[0];
                 paramLine = ss[1] + SPLIT_PARAM + ss[2];
             }
         }
-        Simmand simmand = simmandMap.get(methodName);
+        String key = group == null ? methodName : group + SPLIT_PARAM + methodName;
+        Simmand simmand = simmandMap.get(key);
         if (simmand == null) {
             throw new NoSuchMethodException();
         }
-        if (argParser == null) {
-            argParser = new SmdArgParser(KEY_PARAM_PREFIX);
+        if (argParserFactory == null) {
+            argParserFactory = new SpecialArgParser();
         }
+        ArgParser argParser = argParserFactory.create(group, methodName);
         ArgValues argValues = argParser.parseLine(paramLine);
         return simmand.run(argValues);
     }
@@ -274,23 +279,35 @@ public class SmdExecutor extends ParamParserService {
         }
     }
 
+    /**
+     * 特殊指令参数解析器工厂类
+     */
+    private static class SpecialArgParser implements ArgParserFactory {
+
+        @Override
+        public ArgParser create(String group, String methodName) {
+            return new SmdArgParser(KEY_PARAM_PREFIX);
+        }
+    }
+
     @SmdClass(value = "help", description = "帮助指令，用于查询当前的指令信息")
     private class HelpSmd {
 
-        @SmdOption(value = "help", description = "查看当前加载的指令列表")
-        public List<SmdInfo> help(
-                @SmdParam(force = false, description = "指定指令指令组名") String group,
-                @SmdParam(force = false, description = "指定指令名") String key) {
-            Stream<SmdInfo> stream = smdInfoMap.values().stream();
-            List<SmdInfo> infoList;
+        @SmdOption(value = "help", description = "查看当前加载的指令列表",
+                example = "输入 help 来显示所有的指令，输入 help --key name 来显示name指令的信息")
+        public List<SmdGroupInfo> help(
+                @SmdParam(value = "group", force = false, description = "指定指令指令组名") String group,
+                @SmdParam(value = "key", force = false, description = "指定指令名") String key) {
+            Stream<SmdGroupInfo> stream = smdInfoMap.values().stream();
+            List<SmdGroupInfo> infoList;
             if (group != null) {
-                infoList = stream.filter(smdInfo -> smdInfo.getKey().startsWith(group)).collect(Collectors.toList());
+                infoList = stream.filter(smdGroupInfo -> smdGroupInfo.getKey().startsWith(group)).collect(Collectors.toList());
             } else {
                 infoList = stream.collect(Collectors.toList());
             }
             if (key != null) {
-                for (SmdInfo smdInfo : infoList) {
-                    smdInfo.getMethodInfoList().removeIf(info -> {
+                for (SmdGroupInfo smdGroupInfo : infoList) {
+                    smdGroupInfo.getMethodInfoList().removeIf(info -> {
                         for (String k : info.getKey()) {
                             if (k.equals(key)) {
                                 return false;

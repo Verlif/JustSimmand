@@ -30,4 +30,9 @@ public @interface SmdOption {
      * @return {@code true} - 忽略此方法；{@code false} - 不忽略此方法。
      */
     boolean ignored() default false;
+
+    /**
+     * 方法调用举例
+     */
+    String example() default "";
 }

@@ -20,6 +20,11 @@ public class SmdMethodInfo {
     private String description;
 
     /**
+     * 方法示例
+     */
+    private String example;
+
+    /**
      * 指令参数列表
      */
     private final List<SmdArgInfo> argInfoList;
@@ -42,6 +47,14 @@ public class SmdMethodInfo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getExample() {
+        return example;
+    }
+
+    public void setExample(String example) {
+        this.example = example;
     }
 
     public List<SmdArgInfo> getArgInfoList() {

@@ -106,8 +106,8 @@ public class MainTest {
         System.out.println("基础调用: " + smdExecutor.run("math ^ 2"));
         // 输出help
         List<SmdInfo> run = (List<SmdInfo>) smdExecutor.run("help");
-        for (SmdInfo smdInfo : run) {
-            System.out.print(smdInfo);
+        for (SmdInfo smdGroupInfo : run) {
+            System.out.print(smdGroupInfo);
         }
     }
 }
@@ -120,15 +120,16 @@ public class MainTest {
 使用指令设定值: 3
 基础调用: 4
 help - 帮助指令，用于查询当前的指令信息
-	--> help                	查看当前加载的指令列表
-		--[group]             	指定指令指令组名
-		--[key]               	指定指令名
+	[ help ] --> 查看当前加载的指令列表
+	--> 输入 help 来显示所有的指令，输入 help --key name 来显示name指令的信息
+		[group]             	_NULL_              	指定指令指令组名
+		[key]               	_NULL_              	指定指令名
 math - 简单的测试指令
-	--> plus, +             	两数之和
-		--[a]                 	相加的第一个数字，可以为空
-		**b                   	相加的第二个数字，默认值是3
-	--> square, ^           	做平方
-		--[a]                 	null
+	[ plus, + ] --> 两数之和
+		[a]                 	_NULL_              	相加的第一个数字，可以为空
+		*b*                 	3                   	相加的第二个数字，默认值是3
+	[ square, ^ ] --> 做平方
+		[a]                 	_NULL_              	null
 ```
 
 **help**输出比较简陋，后续可能会修改。当然，开发者也可以通过反射实现自己的**help**。

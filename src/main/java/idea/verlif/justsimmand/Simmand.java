@@ -98,6 +98,7 @@ public abstract class Simmand {
         methodInfo.setKey(key);
         if (smdOption != null) {
             methodInfo.setDescription(smdOption.description());
+            methodInfo.setExample(smdOption.example());
         }
         // 设置指令参数解析表
         parameterTypes = method.getParameterTypes();

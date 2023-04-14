@@ -1,8 +1,11 @@
 package idea.verlif.simmand;
 
+import idea.verlif.justsimmand.ArgParserFactory;
 import idea.verlif.justsimmand.LoadConfig;
+import idea.verlif.justsimmand.SmdArgParser;
 import idea.verlif.justsimmand.SmdExecutor;
-import idea.verlif.justsimmand.info.SmdInfo;
+import idea.verlif.justsimmand.info.SmdGroupInfo;
+import idea.verlif.parser.cmdline.ArgParser;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,11 +26,11 @@ public class MainTest {
         System.out.println("使用指令前缀别名: " + smdExecutor.run("3"));
         // 这里同样因为 "b" 设定有默认值，所以也不需要输入 "b" 的值
         System.out.println("使用指令设定值: " + smdExecutor.run("math plus"));
-        System.out.println("基础调用: " + smdExecutor.run("math ^ 2"));
+        System.out.println("基础调用: " + smdExecutor.run("math ^"));
         // 输出help
-        List<SmdInfo> run = (List<SmdInfo>) smdExecutor.run("help math plus");
-        for (SmdInfo smdInfo : run) {
-            System.out.print(smdInfo);
+        List<SmdGroupInfo> run = (List<SmdGroupInfo>) smdExecutor.run("help");
+        for (SmdGroupInfo smdGroupInfo : run) {
+            System.out.print(smdGroupInfo);
         }
     }
 
