@@ -17,7 +17,7 @@ import java.util.*;
  *
  * @author Verlif
  */
-public abstract class Simmand {
+public abstract class SmdItem {
 
     private final LoadConfig config;
 
@@ -67,7 +67,7 @@ public abstract class Simmand {
      */
     private Map<Integer, Object> valueMap;
 
-    protected Simmand(LoadConfig config) {
+    protected SmdItem(LoadConfig config) {
         this.config = config;
     }
 

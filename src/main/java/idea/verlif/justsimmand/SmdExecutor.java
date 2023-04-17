@@ -31,7 +31,7 @@ public class SmdExecutor extends ParamParserService {
      * key - 指令名；<br/>
      * value - 指令参数序号
      */
-    private final Map<String, Simmand> simmandMap;
+    private final Map<String, SmdItem> simmandMap;
 
     /**
      * 指令信息表。
@@ -56,7 +56,7 @@ public class SmdExecutor extends ParamParserService {
     /**
      * 指令对象工厂类
      */
-    private SimmandFactory simmandFactory;
+    private SmdFactory smdFactory;
 
     /**
      * 参数解析器工厂类
@@ -77,12 +77,23 @@ public class SmdExecutor extends ParamParserService {
         this.smdConfig = smdConfig;
     }
 
-    public void setSimmandFactory(SimmandFactory simmandFactory) {
-        this.simmandFactory = simmandFactory;
+    public void setSmdFactory(SmdFactory smdFactory) {
+        this.smdFactory = smdFactory;
     }
 
     public void setArgParserFactory(ArgParserFactory argParserFactory) {
         this.argParserFactory = argParserFactory;
+    }
+
+    /**
+     * 手动添加指令信息
+     *
+     * @param smdGroupInfo 指令组信息
+     */
+    public void addSmdGroupInfo(SmdGroupInfo smdGroupInfo) {
+        if (smdGroupInfo.getKey() != null) {
+            smdInfoMap.put(smdGroupInfo.getKey(), smdGroupInfo);
+        }
     }
 
     /**
@@ -101,8 +112,8 @@ public class SmdExecutor extends ParamParserService {
      * @param config 指定加载的方法
      */
     public void add(Object o, LoadConfig config) {
-        if (simmandFactory == null) {
-            simmandFactory = new SpecialSimmandFactory();
+        if (smdFactory == null) {
+            smdFactory = new SpecialSmdFactory();
         }
         if (smdConfig == null) {
             smdConfig = new SmdConfig();
@@ -129,15 +140,15 @@ public class SmdExecutor extends ParamParserService {
             // 过滤方法
             if (config.isAllowedModifier(method.getModifiers()) && config.isAllowedMethod(method.getName())) {
                 // 实例化指令
-                Simmand simmand = simmandFactory.create(config);
-                if (simmand.load(o, method)) {
-                    smdMethodInfoList.add(simmand.getMethodInfo());
-                    for (String key : simmand.getKey()) {
+                SmdItem smdItem = smdFactory.create(config);
+                if (smdItem.load(o, method)) {
+                    smdMethodInfoList.add(smdItem.getMethodInfo());
+                    for (String key : smdItem.getKey()) {
                         if (smdConfig.isClassNameGroup()) {
                             key = name + " " + key;
                         }
                         if (config.isAddWithReplace() || !simmandMap.containsKey(key)) {
-                            simmandMap.put(key, simmand);
+                            simmandMap.put(key, smdItem);
                         }
                     }
                 }
@@ -192,8 +203,8 @@ public class SmdExecutor extends ParamParserService {
             }
         }
         String key = group == null ? methodName : group + SPLIT_PARAM + methodName;
-        Simmand simmand = simmandMap.get(key);
-        if (simmand == null) {
+        SmdItem smdItem = simmandMap.get(key);
+        if (smdItem == null) {
             throw new NoSuchMethodException();
         }
         if (argParserFactory == null) {
@@ -201,7 +212,7 @@ public class SmdExecutor extends ParamParserService {
         }
         ArgParser argParser = argParserFactory.create(group, methodName);
         ArgValues argValues = argParser.parseLine(paramLine);
-        return simmand.run(argValues);
+        return smdItem.run(argValues);
     }
 
     /**
@@ -256,9 +267,9 @@ public class SmdExecutor extends ParamParserService {
     /**
      * 特殊指令对象
      */
-    private class SpecialSimmand extends Simmand {
+    private class SpecialSmdItem extends SmdItem {
 
-        protected SpecialSimmand(LoadConfig config) {
+        protected SpecialSmdItem(LoadConfig config) {
             super(config);
         }
 
@@ -271,11 +282,11 @@ public class SmdExecutor extends ParamParserService {
     /**
      * 特殊指令对象工厂类
      */
-    private class SpecialSimmandFactory implements SimmandFactory {
+    private class SpecialSmdFactory implements SmdFactory {
 
         @Override
-        public Simmand create(LoadConfig config) {
-            return new SpecialSimmand(config);
+        public SmdItem create(LoadConfig config) {
+            return new SpecialSmdItem(config);
         }
     }
 

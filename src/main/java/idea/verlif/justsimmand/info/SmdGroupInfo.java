@@ -60,13 +60,13 @@ public class SmdGroupInfo {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append(key).append(" - ").append(description).append("\n");
+        str.append(key).append(" - ").append(description != null ? description : "暂无描述").append("\n");
         // 遍历指令组的所有方法
         for (SmdMethodInfo methodInfo : smdMethodInfoList) {
             String keys = Arrays.toString(methodInfo.getKey());
             // 指令方法描述
             str.append("\t[ ").append(keys, 1, keys.length() - 1).append(" ]")
-                    .append(" --> ").append(methodInfo.getDescription()).append("\n");
+                    .append(" --> ").append(methodInfo.getDescription() != null ? methodInfo.getDescription() : "暂无描述").append("\n");
             // 显示指令示例
             if (methodInfo.getExample() != null && methodInfo.getExample().length() > 0) {
                 str.append("\t--> ").append(methodInfo.getExample()).append("\n");

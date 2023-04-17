@@ -44,5 +44,15 @@ public class MainTest {
         // 开始执行方法
         System.out.println("plus : " + smdExecutor.run("SimpleMath plus 2 3"));
         System.out.println("square : " + smdExecutor.run("SimpleMath square 2"));
+
+        SmdGroupInfo groupInfo = new SmdGroupInfo();
+        groupInfo.setKey("add");
+        groupInfo.setDescription("add a to b");
+        smdExecutor.addSmdGroupInfo(groupInfo);
+        // 输出help
+        List<SmdGroupInfo> run = (List<SmdGroupInfo>) smdExecutor.run("help");
+        for (SmdGroupInfo smdGroupInfo : run) {
+            System.out.print(smdGroupInfo);
+        }
     }
 }
