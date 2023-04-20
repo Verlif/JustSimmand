@@ -28,10 +28,10 @@ public class SmdExecutor extends ParamParserService {
 
     /**
      * 指令表。<br/>
-     * key - 指令名；<br/>
-     * value - 指令参数序号
+     * key - 分组名称<br/>
+     * value - 组内指令表。
      */
-    private final Map<String, SmdItem> simmandMap;
+    private final Map<String, Map<String, SmdItem>> smdItemMap;
 
     /**
      * 指令信息表。
@@ -59,15 +59,29 @@ public class SmdExecutor extends ParamParserService {
     private SmdFactory smdFactory;
 
     /**
+     * 指令链接解析器
+     */
+    private SmdLinkParser smdLinkParser;
+
+    /**
      * 参数解析器工厂类
      */
     private ArgParserFactory argParserFactory;
 
     public SmdExecutor() {
-        simmandMap = new HashMap<>();
-        smdInfoMap = new HashMap<>();
-        defaultConfig = new LoadConfig();
-        prefixMap = new HashMap<>();
+        this(new SmdConfig());
+    }
+
+    public SmdExecutor(SmdConfig smdConfig) {
+        this.smdItemMap = new HashMap<>();
+        this.smdInfoMap = new HashMap<>();
+        this.defaultConfig = new LoadConfig();
+        this.prefixMap = new HashMap<>();
+
+        this.smdConfig = smdConfig;
+        this.smdFactory = new SpecialSmdFactory();
+        this.smdLinkParser = new BlockSmdLinkParser('(', ')');
+        this.argParserFactory = new SpecialArgParser();
 
         add(new HelpSmd());
         addPrefixReplace("help help", "help");
@@ -79,6 +93,10 @@ public class SmdExecutor extends ParamParserService {
 
     public void setSmdFactory(SmdFactory smdFactory) {
         this.smdFactory = smdFactory;
+    }
+
+    public void setSmdLinkParser(SmdLinkParser smdLinkParser) {
+        this.smdLinkParser = smdLinkParser;
     }
 
     public void setArgParserFactory(ArgParserFactory argParserFactory) {
@@ -112,28 +130,25 @@ public class SmdExecutor extends ParamParserService {
      * @param config 指定加载的方法
      */
     public void add(Object o, LoadConfig config) {
-        if (smdFactory == null) {
-            smdFactory = new SpecialSmdFactory();
-        }
-        if (smdConfig == null) {
-            smdConfig = new SmdConfig();
-        }
         Class<?> cla = o.getClass();
         // 新增指令信息
         SmdGroupInfo smdGroupInfo = new SmdGroupInfo();
         SmdClass smdClass = cla.getAnnotation(SmdClass.class);
-        // 构造指令key
-        String name;
-        if (smdClass == null || smdClass.value().length() == 0) {
-            name = cla.getSimpleName();
-        } else {
-            name = smdClass.value();
+        // 获取指令组
+        String group = null;
+        if (smdConfig.isClassNameGroup()) {
+            if (smdClass == null || smdClass.value().length() == 0) {
+                group = cla.getSimpleName();
+            } else {
+                group = smdClass.value();
+            }
         }
         // 构建指令信息
-        smdGroupInfo.setKey(name);
+        smdGroupInfo.setKey(group);
         if (smdClass != null) {
             smdGroupInfo.setDescription(smdClass.description());
         }
+        Map<String, SmdItem> itemMap = smdItemMap.computeIfAbsent(group, k -> new HashMap<>());
         List<Method> allMethods = MethodUtil.getAllMethods(cla);
         List<SmdMethodInfo> smdMethodInfoList = new ArrayList<>();
         for (Method method : allMethods) {
@@ -144,11 +159,8 @@ public class SmdExecutor extends ParamParserService {
                 if (smdItem.load(o, method)) {
                     smdMethodInfoList.add(smdItem.getMethodInfo());
                     for (String key : smdItem.getKey()) {
-                        if (smdConfig.isClassNameGroup()) {
-                            key = name + " " + key;
-                        }
-                        if (config.isAddWithReplace() || !simmandMap.containsKey(key)) {
-                            simmandMap.put(key, smdItem);
+                        if (config.isAddWithReplace() || !itemMap.containsKey(key)) {
+                            itemMap.put(key, smdItem);
                         }
                     }
                 }
@@ -159,6 +171,34 @@ public class SmdExecutor extends ParamParserService {
             smdGroupInfo.addSmdMethodInfo(smdMethodInfoList);
             smdInfoMap.put(smdGroupInfo.getKey(), smdGroupInfo);
         }
+    }
+
+    public synchronized Object execute(String smdLine) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        String[] lines = toLines(smdLine);
+        if (lines.length == 1) {
+            return run(lines[0]);
+        }
+        SmdConfig config = new SmdConfig();
+        config.setClassNameGroup(false);
+        LoadConfig loadConfig = new LoadConfig()
+                .loadMode(LoadConfig.LoadMode.POSITIVE);
+        SmdExecutor tmp = this;
+        Object result = null;
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            result = tmp.run(line);
+            // 返回值中断
+            if (result == null) {
+                if (i == lines.length - 1) { // 运行完毕
+                    return result;
+                } else {
+                    throw new NullPointerException(String.format("line - %s can not find result!", line));
+                }
+            }
+            tmp = new SmdExecutor(config);
+            tmp.add(result, loadConfig);
+        }
+        return result;
     }
 
     /**
@@ -184,31 +224,19 @@ public class SmdExecutor extends ParamParserService {
         String paramLine = "";
         if (ss.length == 1) {
             methodName = ss[0];
-        } else if (ss.length == 2) {
-            if (smdConfig.isClassNameGroup()) {
-                group = ss[0];
-                methodName = ss[1];
-            } else {
-                methodName = ss[0];
-                paramLine = ss[1];
-            }
         } else {
             if (smdConfig.isClassNameGroup()) {
                 group = ss[0];
                 methodName = ss[1];
-                paramLine = ss[2];
+                paramLine = ss.length == 3 ? ss[2] : "";
             } else {
                 methodName = ss[0];
-                paramLine = ss[1] + SPLIT_PARAM + ss[2];
+                paramLine = ss[1];
             }
         }
-        String key = group == null ? methodName : group + SPLIT_PARAM + methodName;
-        SmdItem smdItem = simmandMap.get(key);
+        SmdItem smdItem = smdItemMap.get(group).get(methodName);
         if (smdItem == null) {
             throw new NoSuchMethodException();
-        }
-        if (argParserFactory == null) {
-            argParserFactory = new SpecialArgParser();
         }
         ArgParser argParser = argParserFactory.create(group, methodName);
         ArgValues argValues = argParser.parseLine(paramLine);
@@ -221,7 +249,7 @@ public class SmdExecutor extends ParamParserService {
      * @return 指令Key集
      */
     public Set<String> allKey() {
-        return simmandMap.keySet();
+        return smdItemMap.keySet();
     }
 
     /**
@@ -265,6 +293,24 @@ public class SmdExecutor extends ParamParserService {
     }
 
     /**
+     * 清空指令缓存与指令信息
+     */
+    public void clear() {
+        smdItemMap.clear();
+        smdInfoMap.clear();
+    }
+
+    /**
+     * 解析链接指令
+     *
+     * @param smdLink 指令行字符串
+     * @return 链接指令数组
+     */
+    private String[] toLines(String smdLink) {
+        return smdLinkParser.parse(smdLink);
+    }
+
+    /**
      * 特殊指令对象
      */
     private class SpecialSmdItem extends SmdItem {
@@ -305,7 +351,8 @@ public class SmdExecutor extends ParamParserService {
     private class HelpSmd {
 
         @SmdOption(value = "help", description = "查看当前加载的指令列表",
-                example = "输入 help 来显示所有的指令，输入 help --key name 来显示name指令的信息")
+                example = "输入 help 来显示所有的指令，输入 help --group group --key key 来显示group下key指令的信息，例如 help math plus。" +
+                        "实际上也可以使用 help --key key 来查询所有组下key指令的信息。")
         public List<SmdGroupInfo> help(
                 @SmdParam(value = "group", force = false, description = "指定指令指令组名") String group,
                 @SmdParam(value = "key", force = false, description = "指定指令名") String key) {

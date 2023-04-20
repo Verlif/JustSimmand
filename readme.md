@@ -135,6 +135,18 @@ math - 简单的测试指令
 
 The output is rather sketchy and may be modified subsequently. Of course, developers can also implement their own **help** through reflection.
 
+## SmdLink
+
+SmdLink is a feature enabled for secondary development that allows users to make chain calls.
+
+For example, using `new BlockSmdLinkParser('(', ')')` you can split `(groupA methodA paramA)(methodB paramB)(methodC paramC)` into the following parts:
+
+1. `groupA methodA paramA`
+2. `methodB paramB`
+3. `methodC paramC`
+
+At this point, the return value of the second instruction will be used as the object of the second instruction, the return value of the second instruction will be used as the specified object of the third instruction, and so on.
+
 ## Using
 
 1. Add Jitpack repository source

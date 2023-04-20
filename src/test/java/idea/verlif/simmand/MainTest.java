@@ -1,11 +1,10 @@
 package idea.verlif.simmand;
 
-import idea.verlif.justsimmand.ArgParserFactory;
+import idea.verlif.justsimmand.BlockSmdLinkParser;
 import idea.verlif.justsimmand.LoadConfig;
-import idea.verlif.justsimmand.SmdArgParser;
+import idea.verlif.justsimmand.PointSmdLinkParser;
 import idea.verlif.justsimmand.SmdExecutor;
 import idea.verlif.justsimmand.info.SmdGroupInfo;
-import idea.verlif.parser.cmdline.ArgParser;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +43,11 @@ public class MainTest {
         // 开始执行方法
         System.out.println("plus : " + smdExecutor.run("SimpleMath plus 2 3"));
         System.out.println("square : " + smdExecutor.run("SimpleMath square 2"));
+        System.out.println("square : " + smdExecutor.run("SimpleMath square 2"));
+        smdExecutor.setSmdLinkParser(new PointSmdLinkParser());
+        System.out.println("linkExecute : " + smdExecutor.execute("SimpleMath getTestB.say \"我说: \\\"你好\\\"\".getTestB.say \\(hihihi\\)"));
+        smdExecutor.setSmdLinkParser(new BlockSmdLinkParser('{', '}'));
+        System.out.println("linkExecute : " + smdExecutor.execute("{SimpleMath getTestB}{say \"我说: \\\"你好\\\"\"}{getTestB}{say \\(hihihi\\)}"));
 
         SmdGroupInfo groupInfo = new SmdGroupInfo();
         groupInfo.setKey("add");
@@ -53,6 +57,15 @@ public class MainTest {
         List<SmdGroupInfo> run = (List<SmdGroupInfo>) smdExecutor.run("help");
         for (SmdGroupInfo smdGroupInfo : run) {
             System.out.print(smdGroupInfo);
+        }
+    }
+
+    @Test
+    public void testForStr() {
+        PointSmdLinkParser linkParser = new PointSmdLinkParser();
+        String[] parse = linkParser.parse("1.2.\"3.4\".5");
+        for (String s : parse) {
+            System.out.println(s);
         }
     }
 }

@@ -134,6 +134,18 @@ math - 简单的测试指令
 
 **help**输出比较简陋，后续可能会修改。当然，开发者也可以通过反射实现自己的**help**。
 
+## 指令链接
+
+指令链接是一个为二次开发而开启的功能，它允许使用者进行链式调用。
+
+例如使用`new BlockSmdLinkParser('(', ')')`可以将`(groupA methodA paramA)(methodB paramB)(methodC paramC)`拆解成以下部分：
+
+1. `groupA methodA paramA`
+2. `methodB paramB`
+3. `methodC paramC`
+
+此时，第二条指令的返回值会作为第二条的指令对象，第二条指令的返回值会作为第三条指令的指定对象，以此类推。
+
 ## 使用方法
 
 1. 添加Jitpack仓库源

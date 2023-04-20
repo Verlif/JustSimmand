@@ -4,6 +4,7 @@ import idea.verlif.parser.cmdline.ArgParser;
 import idea.verlif.parser.cmdline.ArgValues;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SmdArgParser implements ArgParser {
 
@@ -41,38 +42,30 @@ public class SmdArgParser implements ArgParser {
     }
 
     public String[] lineToArray(String line) {
-        ArrayList<String> list = new ArrayList<>();
-        boolean isOneParam = false;
-        StringBuilder sb = new StringBuilder();
         char[] chars = line.toCharArray();
-
+        StringBuilder stb = new StringBuilder();
+        List<String> lines = new ArrayList<>();
+        boolean noStr = true; // 是否不在引号字符串中，若不在则进行空格解析
+        boolean ignoredNext = false; // 是否忽略下一个字符，用于转移符号
         for (char c : chars) {
-            if (isOneParam) {
-                if (c == '"') {
-                    isOneParam = false;
-                    list.add(sb.toString());
-                    sb.delete(0, sb.length());
-                } else {
-                    sb.append(c);
-                }
-            } else if (c == '"') {
-                isOneParam = true;
-            } else if (c == ' ') {
-                if (sb.length() > 0) {
-                    list.add(sb.toString());
-                    sb.delete(0, sb.length());
-                }
+            if (c == '\\') {
+                ignoredNext = true;
+            } else if (ignoredNext) {
+                stb.append(c);
+                ignoredNext = false;
+            } else if (c == '\"') {
+                noStr = !noStr;
+            } else if (noStr && c == ' ') { // 断开
+                lines.add(stb.toString());
+                stb.setLength(0);
             } else {
-                sb.append(c);
+                stb.append(c);
             }
         }
-
-        if (sb.length() > 0) {
-            list.add(sb.toString());
-            sb.delete(0, sb.length());
+        if (stb.length() > 0) {
+            lines.add(stb.toString());
         }
-
-        return list.toArray(new String[0]);
+        return lines.toArray(new String[0]);
     }
 
     protected String getKeyFromArg(String arg) {
