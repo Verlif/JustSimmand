@@ -57,6 +57,16 @@ public class SmdGroupInfo {
         smdMethodInfoList.addAll(collection);
     }
 
+    public SmdGroupInfo copy() {
+        SmdGroupInfo groupInfo = new SmdGroupInfo();
+        groupInfo.key = this.key;
+        groupInfo.description = this.description;
+        for (SmdMethodInfo smdMethodInfo : this.smdMethodInfoList) {
+            groupInfo.smdMethodInfoList.add(smdMethodInfo.copy());
+        }
+        return groupInfo;
+    }
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();

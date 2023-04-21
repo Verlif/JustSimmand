@@ -37,8 +37,8 @@ public class MainTest {
         smdExecutor.add(new SimpleMath(), new LoadConfig()
                 .loadMode(LoadConfig.LoadMode.POSITIVE));
         // Start execution method
-        System.out.println("plus : " + smdExecutor.run("SimpleMath plus 2 3"));
-        System.out.println("square : " + smdExecutor.run("SimpleMath square 2"));
+        System.out.println("plus : " + smdExecutor.execute("SimpleMath plus 2 3"));
+        System.out.println("square : " + smdExecutor.execute("SimpleMath square 2"));
     }
 }
 ```
@@ -101,12 +101,12 @@ public class MainTest {
         // The "--b" here means that the "4" that follows is part of the "b" parameter
         smdExecutor.addPrefixReplace("math plus --b 4", "3", "test");
         // The command is called using an alias, where the default value of "0" is given because "a" is not a mandatory parameter and is a base type
-        System.out.println("使用指令前缀别名: " + smdExecutor.run("3"));
+        System.out.println("使用指令前缀别名: " + smdExecutor.execute("3"));
         // Here again, there is no need to enter the value of "b" because it is set to a default value
-        System.out.println("使用指令设定值: " + smdExecutor.run("math plus"));
-        System.out.println("基础调用: " + smdExecutor.run("math ^ 2"));
+        System.out.println("使用指令设定值: " + smdExecutor.execute("math plus"));
+        System.out.println("基础调用: " + smdExecutor.execute("math ^ 2"));
         // Output the help
-        List<SmdInfo> run = (List<SmdInfo>) smdExecutor.run("help");
+        List<SmdInfo> run = (List<SmdInfo>) smdExecutor.execute("help");
         for (SmdInfo smdGroupInfo : run) {
             System.out.print(smdGroupInfo);
         }

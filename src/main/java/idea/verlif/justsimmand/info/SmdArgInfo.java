@@ -56,4 +56,13 @@ public class SmdArgInfo {
     public void setForce(boolean force) {
         this.force = force;
     }
+
+    public SmdArgInfo copy() {
+        SmdArgInfo smdArgInfo = new SmdArgInfo();
+        smdArgInfo.key = this.key;
+        smdArgInfo.description = this.description;
+        smdArgInfo.force = this.force;
+        smdArgInfo.defaultVal = this.defaultVal;
+        return smdArgInfo;
+    }
 }

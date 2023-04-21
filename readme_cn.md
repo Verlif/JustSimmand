@@ -37,8 +37,8 @@ public class MainTest {
         smdExecutor.add(new SimpleMath(), new LoadConfig()
                 .loadMode(LoadConfig.LoadMode.POSITIVE));
         // 开始执行方法
-        System.out.println("plus : " + smdExecutor.run("SimpleMath plus 2 3"));
-        System.out.println("square : " + smdExecutor.run("SimpleMath square 2"));
+        System.out.println("plus : " + smdExecutor.execute("SimpleMath plus 2 3"));
+        System.out.println("square : " + smdExecutor.execute("SimpleMath square 2"));
     }
 }
 ```
@@ -100,12 +100,12 @@ public class MainTest {
         // 这里的 "--b" 表示后面的 "4" 是属于参数 "b" 的
         smdExecutor.addPrefixReplace("math plus --b 4", "3", "test");
         // 使用别名进行指令调用，这里因为 "a" 并不是强制参数且是基础类型，所以会给予默认值 "0"
-        System.out.println("使用指令前缀别名: " + smdExecutor.run("3"));
+        System.out.println("使用指令前缀别名: " + smdExecutor.execute("3"));
         // 这里同样因为 "b" 设定有默认值，所以也不需要输入 "b" 的值
-        System.out.println("使用指令设定值: " + smdExecutor.run("math plus"));
-        System.out.println("基础调用: " + smdExecutor.run("math ^ 2"));
+        System.out.println("使用指令设定值: " + smdExecutor.execute("math plus"));
+        System.out.println("基础调用: " + smdExecutor.execute("math ^ 2"));
         // 输出help
-        List<SmdInfo> run = (List<SmdInfo>) smdExecutor.run("help");
+        List<SmdInfo> run = (List<SmdInfo>) smdExecutor.execute("help");
         for (SmdInfo smdGroupInfo : run) {
             System.out.print(smdGroupInfo);
         }

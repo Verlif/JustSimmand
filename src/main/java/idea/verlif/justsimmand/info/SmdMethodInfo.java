@@ -68,4 +68,15 @@ public class SmdMethodInfo {
     public void addSmdArgInfo(Collection<SmdArgInfo> collection) {
         argInfoList.addAll(collection);
     }
+
+    public SmdMethodInfo copy() {
+        SmdMethodInfo smdMethodInfo = new SmdMethodInfo();
+        smdMethodInfo.key = this.key;
+        smdMethodInfo.description = this.description;
+        smdMethodInfo.example = this.example;
+        for (SmdArgInfo smdArgInfo : this.argInfoList) {
+            smdMethodInfo.argInfoList.add(smdArgInfo.copy());
+        }
+        return smdMethodInfo;
+    }
 }

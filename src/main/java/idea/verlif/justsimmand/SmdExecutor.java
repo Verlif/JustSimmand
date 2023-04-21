@@ -13,8 +13,6 @@ import idea.verlif.reflection.util.MethodUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 指令执行器，用于执行指令行或指令参数。
@@ -135,20 +133,22 @@ public class SmdExecutor extends ParamParserService {
         SmdGroupInfo smdGroupInfo = new SmdGroupInfo();
         SmdClass smdClass = cla.getAnnotation(SmdClass.class);
         // 获取指令组
-        String group = null;
+        String group = null; // 指令组名称，用于构建指令信息
+        String groupName = null; // 指令分组名，用于处理指令的组区分
         if (smdConfig.isClassNameGroup()) {
             if (smdClass == null || smdClass.value().length() == 0) {
                 group = cla.getSimpleName();
             } else {
                 group = smdClass.value();
             }
+            groupName = group;
         }
         // 构建指令信息
         smdGroupInfo.setKey(group);
         if (smdClass != null) {
             smdGroupInfo.setDescription(smdClass.description());
         }
-        Map<String, SmdItem> itemMap = smdItemMap.computeIfAbsent(group, k -> new HashMap<>());
+        Map<String, SmdItem> itemMap = smdItemMap.computeIfAbsent(groupName, k -> new HashMap<>());
         List<Method> allMethods = MethodUtil.getAllMethods(cla);
         List<SmdMethodInfo> smdMethodInfoList = new ArrayList<>();
         for (Method method : allMethods) {
@@ -169,10 +169,17 @@ public class SmdExecutor extends ParamParserService {
         // 添加指令信息到信息表
         if (!smdMethodInfoList.isEmpty()) {
             smdGroupInfo.addSmdMethodInfo(smdMethodInfoList);
-            smdInfoMap.put(smdGroupInfo.getKey(), smdGroupInfo);
+            smdInfoMap.put(group, smdGroupInfo);
         }
     }
 
+    /**
+     * 通过指令行运行指令。<br/>
+     * 请注意编译时参数名会被屏蔽。
+     *
+     * @param smdLine 指令行
+     * @return 指令结果。执行成功则返回执行方法的返回对象，否则抛出异常。
+     */
     public synchronized Object execute(String smdLine) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         String[] lines = toLines(smdLine);
         if (lines.length == 1) {
@@ -208,7 +215,7 @@ public class SmdExecutor extends ParamParserService {
      * @param line 指令行
      * @return 指令结果。执行成功则返回执行方法的返回对象，否则返回错误信息（String）。
      */
-    public Object run(String line) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    private Object run(String line) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         // 处理指令别名
         String newLine = line;
         for (Map.Entry<String, String> entry : prefixMap.entrySet()) {
@@ -233,6 +240,9 @@ public class SmdExecutor extends ParamParserService {
                 methodName = ss[0];
                 paramLine = ss[1];
             }
+        }
+        if (!smdInfoMap.containsKey(group)) {
+            throw new NoSuchGroupException(group);
         }
         SmdItem smdItem = smdItemMap.get(group).get(methodName);
         if (smdItem == null) {
@@ -356,15 +366,23 @@ public class SmdExecutor extends ParamParserService {
         public List<SmdGroupInfo> help(
                 @SmdParam(value = "group", force = false, description = "指定指令指令组名") String group,
                 @SmdParam(value = "key", force = false, description = "指定指令名") String key) {
-            Stream<SmdGroupInfo> stream = smdInfoMap.values().stream();
-            List<SmdGroupInfo> infoList;
-            if (group != null) {
-                infoList = stream.filter(smdGroupInfo -> smdGroupInfo.getKey().startsWith(group)).collect(Collectors.toList());
+            List<SmdGroupInfo> list = new ArrayList<>();
+            // 获取组列表
+            if (group == null) {
+                for (SmdGroupInfo value : smdInfoMap.values()) {
+                    list.add(value.copy());
+                }
             } else {
-                infoList = stream.collect(Collectors.toList());
+                SmdGroupInfo groupInfo = smdInfoMap.get(group);
+                if (groupInfo == null) {
+                    return list;
+                } else {
+                    list.add(groupInfo.copy());
+                }
             }
+            // 进行key过滤
             if (key != null) {
-                for (SmdGroupInfo smdGroupInfo : infoList) {
+                for (SmdGroupInfo smdGroupInfo : list) {
                     smdGroupInfo.getMethodInfoList().removeIf(info -> {
                         for (String k : info.getKey()) {
                             if (k.equals(key)) {
@@ -375,7 +393,7 @@ public class SmdExecutor extends ParamParserService {
                     });
                 }
             }
-            return infoList;
+            return list;
         }
     }
 }

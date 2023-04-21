@@ -21,7 +21,7 @@ public class SmdArgParser implements ArgParser {
     public ArgValues parser(String[] args) {
         ArgValues argValues = new ArgValues();
 
-        for(int i = 0; i < args.length; ++i) {
+        for(int i = 0; i < args.length; i++) {
             String key = this.getKeyFromArg(args[i]);
             if (key == null) {
                 argValues.add(null, args[i]);
@@ -31,7 +31,7 @@ public class SmdArgParser implements ArgParser {
                     argValues.add(null, key);
                 } else if (this.getKeyFromArg(args[next]) == null) {
                     argValues.add(key, args[next]);
-                    ++i;
+                    i = next;
                 } else {
                     argValues.add(null, key);
                 }
@@ -54,7 +54,11 @@ public class SmdArgParser implements ArgParser {
                 stb.append(c);
                 ignoredNext = false;
             } else if (c == '\"') {
-                noStr = !noStr;
+                if (stb.length() > 0 && noStr) {
+                    stb.append(c);
+                } else {
+                    noStr = !noStr;
+                }
             } else if (noStr && c == ' ') { // 断开
                 lines.add(stb.toString());
                 stb.setLength(0);

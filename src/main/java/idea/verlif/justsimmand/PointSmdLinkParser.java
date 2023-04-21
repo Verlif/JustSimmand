@@ -31,7 +31,11 @@ public class PointSmdLinkParser implements SmdLinkParser {
                 stb.append(c);
                 ignoredNext = false;
             } else if (c == '\"') {
-                noStr = !noStr;
+                if (stb.length() > 0 && noStr) {
+                    stb.append(c);
+                } else {
+                    noStr = !noStr;
+                }
             }else if (noStr && c == '.') {
                 lines.add(stb.toString());
                 stb.setLength(0);

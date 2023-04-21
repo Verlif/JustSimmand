@@ -9,7 +9,10 @@ import idea.verlif.parser.cmdline.ArgValues;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 指令对象，由{@link SmdExecutor}自动生成。<br>
@@ -109,7 +112,7 @@ public abstract class SmdItem {
         Parameter[] parameters = method.getParameters();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            String key = parameter.getName();
+            String paramKey = parameter.getName();
             SmdArgInfo smdArgInfo = new SmdArgInfo();
             SmdParam smdParam = parameter.getAnnotation(SmdParam.class);
             if (smdParam != null) {
@@ -121,7 +124,7 @@ public abstract class SmdItem {
                     valueMap.put(i, convert(smdParam.defaultVal(), parameterTypes[i]));
                     smdArgInfo.setDefaultVal(smdParam.defaultVal());
                     if (smdParam.value().length() > 0) {
-                        key = smdParam.value();
+                        paramKey = smdParam.value();
                     }
                 } else if (smdParam.force()) {
                     valueMap.put(i, ForceValue.class);
@@ -129,9 +132,9 @@ public abstract class SmdItem {
             } else {
                 valueMap.put(i, null);
             }
-            keyMap.put(i, key);
-            paramMap.put(key, i);
-            smdArgInfo.setKey(key);
+            keyMap.put(i, paramKey);
+            paramMap.put(paramKey, i);
+            smdArgInfo.setKey(paramKey);
             methodInfo.addSmdArgInfo(smdArgInfo);
         }
         return true;
@@ -160,14 +163,14 @@ public abstract class SmdItem {
         // 构建参数数组
         Deque<String> noKeyValue = new ArrayDeque<>();
         for (int i = 0, size = argValues.size(); i < size; i++) {
-            String key = argValues.getKey(i);
-            if (key == null) {
+            String argKey = argValues.getKey(i);
+            if (argKey == null) {
                 noKeyValue.add(argValues.getValue(i));
             }
         }
         for (int i = 0, size = keyMap.size(); i < size; i++) {
-            String key = keyMap.get(i);
-            Object value = argValues.getValue(key);
+            String localKey = keyMap.get(i);
+            Object value = argValues.getValue(localKey);
             if (value == null && !noKeyValue.isEmpty()) {
                 value = noKeyValue.pop();
             }
@@ -179,7 +182,7 @@ public abstract class SmdItem {
             if (value != null) {
                 Integer integer = null;
                 if (argValues.size() > i) {
-                    integer = paramMap.get(key);
+                    integer = paramMap.get(localKey);
                 }
                 if (integer == null) {
                     params[i] = value;
@@ -216,62 +219,15 @@ public abstract class SmdItem {
      */
     protected abstract Object convert(String str, Class<?> cla);
 
-    private String[] split(String str) {
-        char[] chars = str.toCharArray();
-        boolean in = false;
-        boolean ready = false;
-        boolean tran = false;
-        List<String> list = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
-        for (char c : chars) {
-            if (in) {
-                if (c == '\"') {
-                    in = false;
-                    list.add(sb.toString());
-                    sb.setLength(0);
-                } else {
-                    sb.append(c);
-                    ready = true;
-                }
-            } else {
-                if (c == '\"') {
-                    if (tran) {
-                        sb.append(c);
-                        tran = false;
-                    } else {
-                        in = true;
-                        if (ready) {
-                            list.add(sb.toString());
-                            sb.setLength(0);
-                        }
-                    }
-                } else if (c == '\\') {
-                    tran = true;
-                } else if (c == ' ') {
-                    if (sb.length() > 0) {
-                        list.add(sb.toString());
-                    }
-                    ready = false;
-                    sb.setLength(0);
-                } else {
-                    sb.append(c);
-                    ready = true;
-                }
-            }
-        }
-        if (sb.length() > 0) {
-            list.add(sb.toString());
-        }
-        return list.toArray(new String[0]);
-    }
-
     /**
      * 强制参数替代值
      */
-    private interface ForceValue {}
+    private interface ForceValue {
+    }
 
     /**
      * 获取基础类型的默认值
+     *
      * @param cla 基础类型类
      * @return 基础类型对应的默认值
      */

@@ -1,4 +1,4 @@
-package idea.verlif.simmand;
+package idea.verlif.simmand.domain;
 
 import idea.verlif.justsimmand.anno.SmdClass;
 import idea.verlif.justsimmand.anno.SmdOption;
