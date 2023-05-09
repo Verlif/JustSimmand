@@ -6,9 +6,17 @@ public class LinkA {
         return "A";
     }
 
+    public void param(Class<?> cl) {
+        System.out.println(cl);
+    }
+
     public LinkB b(String b) {
         System.out.println(b);
         return new LinkB();
+    }
+
+    public void hi() {
+        System.out.println("hi");
     }
 
     public static class LinkB {

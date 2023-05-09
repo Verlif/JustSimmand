@@ -13,6 +13,11 @@ public class SmdConfig {
      */
     private boolean classNameGroup = true;
 
+    /**
+     * 是否开启指令链模式，此模式会导致指令行中的小数点被识别成分隔符，需要使用 "{@code \.}" 替换 "{@code .}"。
+     */
+    private boolean linkable = false;
+
     public boolean isClassNameGroup() {
         return classNameGroup;
     }
@@ -21,4 +26,21 @@ public class SmdConfig {
         this.classNameGroup = classNameGroup;
     }
 
+    public SmdConfig classNameGroup(boolean classNameGroup) {
+        this.classNameGroup = classNameGroup;
+        return this;
+    }
+
+    public boolean isLinkable() {
+        return linkable;
+    }
+
+    public void setLinkable(boolean linkable) {
+        this.linkable = linkable;
+    }
+
+    public SmdConfig linkable(boolean linkable) {
+        this.linkable = linkable;
+        return this;
+    }
 }

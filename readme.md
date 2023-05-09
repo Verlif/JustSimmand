@@ -5,7 +5,7 @@
 `JustSimmand`, A simple and intuitive command system.
 
 on the `JustSimmand`, An instance object is an instruction set, and each method of an instance object is an instruction.
-No longer need to manually write call methods, just write instructions like Java code.
+No longer need to manually write call methods, just write instructions like Java object.
 
 ## Example
 
@@ -146,6 +146,25 @@ For example, using `new BlockSmdLinkParser('(', ')')` you can split `(groupA met
 3. `methodC paramC`
 
 At this point, the return value of the second instruction will be used as the object of the second instruction, the return value of the second instruction will be used as the specified object of the third instruction, and so on.
+
+Open SmdLink, need to change command configuration: `smdExecutor.getSmdConfig().setLinkable(true);`
+
+## Variable
+
+A parameter variable is an object replacement identifier that can be used in a directive. For example, the developer can pre-define the variable object and use it in the directive by `#{key}` when it needs to be used.
+
+example:
+
+```java
+// 添加自己到指令中
+smdExecutor.add(smdExecutor);
+// 创建开启指令链配置
+SmdConfig config = new SmdConfig().linkable(true);
+// 将配置添加到执行器配置中
+smdExecutor.variable("config", config);
+// 在指令中使用#{config}来将变量直接传入参数，以此来设置此执行器配置
+smdExecutor.execute("executor setSmdConfig #{config}");
+```
 
 ## Using
 

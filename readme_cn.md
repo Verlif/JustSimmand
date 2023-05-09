@@ -5,7 +5,7 @@
 `JustSimmand`，一个简单且直观的指令系统。
 
 在`JustSimmand`中，一个实例对象就是一个指令集，实例对象的每一个方法就是一条指令。
-不需要再手动写调用方法，只需要像写Java代码一样写指令即可。
+不需要再手动写调用方法，只需要像写Java对象一样写指令即可。
 
 ## 举例
 
@@ -132,8 +132,6 @@ math - 简单的测试指令
 		[a]                 	_NULL_              	null
 ```
 
-**help**输出比较简陋，后续可能会修改。当然，开发者也可以通过反射实现自己的**help**。
-
 ## 指令链接
 
 指令链接是一个为二次开发而开启的功能，它允许使用者进行链式调用。
@@ -145,6 +143,25 @@ math - 简单的测试指令
 3. `methodC paramC`
 
 此时，第二条指令的返回值会作为第二条的指令对象，第二条指令的返回值会作为第三条指令的指定对象，以此类推。
+
+开启指令链，需要更改指令配置：`smdExecutor.getSmdConfig().setLinkable(true);`
+
+## 参数变量
+
+参数变量是在指令中可使用的对象替换标识。例如开发者可以预先设定变量对象，需要使用时可以在指令中通过`#{key}`进行使用。
+
+例如：
+
+```java
+// 添加自己到指令中
+smdExecutor.add(smdExecutor);
+// 创建开启指令链配置
+SmdConfig config = new SmdConfig().linkable(true);
+// 将配置添加到执行器配置中
+smdExecutor.variable("config", config);
+// 在指令中使用#{config}来将变量直接传入参数，以此来设置此执行器配置
+smdExecutor.execute("executor setSmdConfig #{config}");
+```
 
 ## 使用方法
 

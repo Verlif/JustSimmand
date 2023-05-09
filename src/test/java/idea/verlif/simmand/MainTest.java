@@ -1,9 +1,10 @@
 package idea.verlif.simmand;
 
-import idea.verlif.justsimmand.BlockSmdLinkParser;
 import idea.verlif.justsimmand.LoadConfig;
 import idea.verlif.justsimmand.PointSmdLinkParser;
+import idea.verlif.justsimmand.SmdConfig;
 import idea.verlif.justsimmand.SmdExecutor;
+import idea.verlif.justsimmand.anno.SmdParam;
 import idea.verlif.justsimmand.info.SmdGroupInfo;
 import idea.verlif.simmand.domain.LinkA;
 import idea.verlif.simmand.domain.Math;
@@ -55,20 +56,22 @@ public class MainTest {
 
         System.out.println(smdExecutor.execute("SimpleMath plus 5 -3")); // 2
         System.out.println(smdExecutor.execute("SimpleMath square 6")); // 36
+        smdExecutor.getSmdConfig().setLinkable(true);
         System.out.println(smdExecutor.execute("(LinkA b 这里是输出的b).(a 这里是输出的\"引号\").(say)")); // A
         smdExecutor.setSmdLinkParser(new PointSmdLinkParser());
         System.out.println(smdExecutor.execute("LinkA b \"这里是输出的b A\".a 这里是输出的\"引号\".say")); // A
         // 重复输出
         System.out.println("------ 以下是重复输出 ------");
-        System.out.println(smdExecutor.execute("SmdExecutor execute \"LinkA b \\\"这里是输出的b A\\\"\\.a 这里是输出的\\\"引号\\\"\\.say\"")); // A
+        System.out.println(smdExecutor.execute("executor execute \"LinkA b \\\"这里是输出的b A\\\"\\.a 这里是输出的\\\"引号\\\"\\.say\"")); // A
+        System.out.println(smdExecutor.execute("LinkA hi"));
+        SmdConfig config = new SmdConfig().linkable(false);
+        smdExecutor.variable("config", config);
+        smdExecutor.execute("executor setSmdConfig #{config}");
+        System.out.println(smdExecutor.execute("LinkA param java.lang.String"));
     }
 
     @Test
     public void testForStr() {
-        PointSmdLinkParser linkParser = new PointSmdLinkParser();
-        String[] parse = linkParser.parse("1.2.\"3.4\".5");
-        for (String s : parse) {
-            System.out.println(s);
-        }
+        System.out.println(String.format("#{%s}", "abc"));
     }
 }

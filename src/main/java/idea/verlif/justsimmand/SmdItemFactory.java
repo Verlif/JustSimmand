@@ -1,6 +1,9 @@
 package idea.verlif.justsimmand;
 
-public interface SmdFactory {
+/**
+ * 指令单项信息构造工厂
+ */
+public interface SmdItemFactory {
 
     SmdItem create(LoadConfig config);
 }
