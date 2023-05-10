@@ -1,5 +1,7 @@
 package idea.verlif.simmand.domain;
 
+import java.util.Arrays;
+
 public class LinkA {
 
     public String say() {
@@ -15,8 +17,9 @@ public class LinkA {
         return new LinkB();
     }
 
-    public void hi() {
-        System.out.println("hi");
+    public void hi(String a, String... b) {
+        System.out.println(a);
+        System.out.println(Arrays.toString(b));
     }
 
     public static class LinkB {

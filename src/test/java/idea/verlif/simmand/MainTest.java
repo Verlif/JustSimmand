@@ -63,7 +63,7 @@ public class MainTest {
         // 重复输出
         System.out.println("------ 以下是重复输出 ------");
         System.out.println(smdExecutor.execute("executor execute \"LinkA b \\\"这里是输出的b A\\\"\\.a 这里是输出的\\\"引号\\\"\\.say\"")); // A
-        System.out.println(smdExecutor.execute("LinkA hi"));
+        System.out.println(smdExecutor.execute("LinkA hi 1 \"2 4 5 6\""));
         SmdConfig config = new SmdConfig().linkable(false);
         smdExecutor.variable("config", config);
         smdExecutor.execute("executor setSmdConfig #{config}");

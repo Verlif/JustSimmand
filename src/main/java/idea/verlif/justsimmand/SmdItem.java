@@ -9,10 +9,7 @@ import idea.verlif.parser.cmdline.ArgValues;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 指令对象，由{@link SmdExecutor}自动生成。<br>

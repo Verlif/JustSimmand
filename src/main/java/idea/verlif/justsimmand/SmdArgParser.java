@@ -21,7 +21,7 @@ public class SmdArgParser implements ArgParser {
     public ArgValues parser(String[] args) {
         ArgValues argValues = new ArgValues();
 
-        for(int i = 0; i < args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             String key = this.getKeyFromArg(args[i]);
             if (key == null) {
                 argValues.add(null, args[i]);
@@ -60,8 +60,11 @@ public class SmdArgParser implements ArgParser {
                     noStr = !noStr;
                 }
             } else if (noStr && c == ' ') { // 断开
-                lines.add(stb.toString());
-                stb.setLength(0);
+                // 忽略重复空格
+                if (stb.length() > 0) {
+                    lines.add(stb.toString());
+                    stb.setLength(0);
+                }
             } else {
                 stb.append(c);
             }
