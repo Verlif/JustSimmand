@@ -68,6 +68,7 @@ public class MainTest {
         smdExecutor.variable("config", config);
         smdExecutor.execute("executor setSmdConfig #{config}");
         System.out.println(smdExecutor.execute("LinkA param java.lang.String"));
+        System.out.println(smdExecutor.execute("executor help"));
     }
 
     @Test

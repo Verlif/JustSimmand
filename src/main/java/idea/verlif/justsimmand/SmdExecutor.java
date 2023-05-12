@@ -73,6 +73,11 @@ public class SmdExecutor extends ParamParserService {
      */
     private ArgParserFactory argParserFactory;
 
+    /**
+     * 帮助指令
+     */
+    private HelpSmd helpSmd;
+
     public SmdExecutor() {
         this(new SmdConfig());
     }
@@ -90,7 +95,9 @@ public class SmdExecutor extends ParamParserService {
         this.argParserFactory = new SpecialArgParser();
 
         // 添加Help指令
-        add(new HelpSmd());
+        helpSmd = new HelpSmd();
+        add(helpSmd);
+        // 添加Help别名
         addPrefixReplace("help help", "help");
 
         // 添加解析器
@@ -246,6 +253,15 @@ public class SmdExecutor extends ParamParserService {
             tmp.add(result, loadConfig);
         }
         return result;
+    }
+
+    @SmdOption(value = "help", description = "查看当前加载的指令列表",
+            example = "输入 help 来显示所有的指令，输入 help --group group --key key 来显示group下key指令的信息，例如 help math plus。" +
+                    "实际上也可以使用 help --key key 来查询所有组下key指令的信息。")
+    public List<SmdGroupInfo> help(
+            @SmdParam(value = "group", force = false, description = "指定指令指令组名") String group,
+            @SmdParam(value = "key", force = false, description = "指定指令名") String key) {
+        return helpSmd.help(group, key);
     }
 
     /**
