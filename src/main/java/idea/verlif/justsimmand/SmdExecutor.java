@@ -211,8 +211,13 @@ public class SmdExecutor extends ParamParserService {
         }
         // 添加指令信息到信息表
         if (!smdMethodInfoList.isEmpty()) {
-            smdGroupInfo.addSmdMethodInfo(smdMethodInfoList);
-            smdInfoMap.put(group, smdGroupInfo);
+            if (smdInfoMap.containsKey(group)) {
+                SmdGroupInfo groupInfo = smdInfoMap.get(group);
+                groupInfo.getMethodInfoList().addAll(smdMethodInfoList);
+            } else {
+                smdGroupInfo.addSmdMethodInfo(smdMethodInfoList);
+                smdInfoMap.put(group, smdGroupInfo);
+            }
         }
     }
 
@@ -316,7 +321,12 @@ public class SmdExecutor extends ParamParserService {
      */
     @SmdOption(value = {"allKey", "keys"}, description = "获取所有可用的指令key", example = "allKey")
     public Set<String> allKey() {
-        return smdItemMap.keySet();
+        if (smdConfig.isClassNameGroup()) {
+            return smdItemMap.keySet();
+        } else {
+            Map<String, SmdItem> itemMap = smdItemMap.get(null);
+            return itemMap.keySet();
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ import idea.verlif.simmand.domain.SimpleMath;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainTest {
@@ -41,6 +42,7 @@ public class MainTest {
     public void simpleTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         // 实例化指令执行器
         SmdExecutor smdExecutor = new SmdExecutor();
+        smdExecutor.getSmdConfig().setClassNameGroup(false);
         LoadConfig loadConfig = new LoadConfig().loadMode(LoadConfig.LoadMode.POSITIVE);
         // 加载对象到指令执行器，并设定加载模式为积极模式
         smdExecutor.add(new SimpleMath(), loadConfig);
@@ -53,6 +55,8 @@ public class MainTest {
         for (SmdGroupInfo groupInfo : help) {
             System.out.println(groupInfo);
         }
+
+        System.out.println(Arrays.toString(smdExecutor.allKey().toArray()));
 
         System.out.println(smdExecutor.execute("SimpleMath plus 5 -3")); // 2
         System.out.println(smdExecutor.execute("SimpleMath square 6")); // 36
