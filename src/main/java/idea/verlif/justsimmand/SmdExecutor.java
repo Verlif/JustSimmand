@@ -6,12 +6,14 @@ import idea.verlif.justsimmand.anno.SmdParam;
 import idea.verlif.justsimmand.info.SmdGroupInfo;
 import idea.verlif.justsimmand.info.SmdMethodInfo;
 import idea.verlif.justsimmand.parser.ClassParser;
+import idea.verlif.justsimmand.pretreatment.PretreatmentException;
+import idea.verlif.justsimmand.pretreatment.PretreatmentLink;
+import idea.verlif.justsimmand.pretreatment.SmdLinePretreatment;
 import idea.verlif.parser.ParamParserService;
 import idea.verlif.parser.cmdline.ArgParser;
 import idea.verlif.parser.cmdline.ArgValues;
 import idea.verlif.reflection.util.MethodUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -37,12 +39,6 @@ public class SmdExecutor extends ParamParserService {
      * 指令信息表。
      */
     private final Map<String, SmdGroupInfo> smdInfoMap;
-
-    /**
-     * 前缀替换表
-     */
-    private final Map<String, String> prefixMap;
-
     /**
      * 变量表
      */
@@ -62,6 +58,11 @@ public class SmdExecutor extends ParamParserService {
      * 指令对象工厂类
      */
     private SmdItemFactory smdFactory;
+
+    /**
+     * 预处理器链
+     */
+    private PretreatmentLink pretreatmentLink;
 
     /**
      * 指令链接解析器
@@ -86,19 +87,17 @@ public class SmdExecutor extends ParamParserService {
         this.smdItemMap = new HashMap<>();
         this.smdInfoMap = new HashMap<>();
         this.defaultConfig = new LoadConfig();
-        this.prefixMap = new HashMap<>();
         this.varsMap = new HashMap<>();
 
         this.smdConfig = smdConfig;
         this.smdFactory = new SpecialSmdFactory();
+        this.pretreatmentLink = new PretreatmentLink();
         this.smdLinkParser = new BlockSmdLinkParser('(', ')');
         this.argParserFactory = new SpecialArgParser();
 
         // 添加Help指令
         helpSmd = new HelpSmd();
         add(helpSmd);
-        // 添加Help别名
-        addPrefixReplace("help help", "help");
 
         // 添加解析器
         addOrReplace(new ClassParser());
@@ -139,6 +138,16 @@ public class SmdExecutor extends ParamParserService {
         if (smdGroupInfo.getKey() != null) {
             smdInfoMap.put(smdGroupInfo.getKey(), smdGroupInfo);
         }
+    }
+
+    /**
+     * 添加指令预处理器
+     *
+     * @param pretreatment 指令预处理器
+     */
+    @SmdOption(value = "addPretreatment", description = "添加指令预处理器", example = "addPretreatment #{pretreatment1}")
+    public void addPretreatment(SmdLinePretreatment pretreatment) {
+        pretreatmentLink.addPretreatment(pretreatment);
     }
 
     /**
@@ -227,9 +236,17 @@ public class SmdExecutor extends ParamParserService {
      *
      * @param smdLine 指令行
      * @return 指令结果。执行成功则返回执行方法的返回对象，否则抛出异常。
+     * @throws NoSuchGroupException  没有找到指令组时抛出此异常
+     * @throws NoSuchMethodException 没有找到命令组下方法时抛出此异常
+     * @throws JustSmdException      反射运行出错抛出此异常
+     * @throws PretreatmentException 预处理未通过时抛出此异常
      */
     @SmdOption(value = {"execute", "exec"}, description = "通过指令行运行指令", example = "exec \"plus 1 2\"")
-    public synchronized Object execute(@SmdParam(value = "line", description = "指令行或指令链") String smdLine) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public synchronized Object execute(@SmdParam(value = "line", description = "指令行或指令链") String smdLine) throws NoSuchGroupException, NoSuchMethodException, JustSmdException, PretreatmentException {
+        smdLine = pretreatmentLink.handle(smdLine);
+        if (smdLine == null) {
+            throw new PretreatmentException();
+        }
         if (!smdConfig.isLinkable()) {
             return run(smdLine);
         }
@@ -275,16 +292,14 @@ public class SmdExecutor extends ParamParserService {
      *
      * @param line 指令行
      * @return 指令结果。执行成功则返回执行方法的返回对象，否则返回错误信息（String）。
+     * @throws NoSuchGroupException  没有找到指令组时抛出此异常
+     * @throws NoSuchMethodException 没有找到命令组下方法时抛出此异常
+     * @throws JustSmdException      反射运行出错抛出此异常
      */
-    private Object run(String line) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    private Object run(String line) throws NoSuchGroupException, NoSuchMethodException, JustSmdException {
         // 处理指令别名
         String newLine = line;
-        for (Map.Entry<String, String> entry : prefixMap.entrySet()) {
-            if (line.startsWith(entry.getKey())) {
-                newLine = entry.getValue() + line.substring(entry.getKey().length());
-                break;
-            }
-        }
+
         // 构建指令参数
         String[] ss = newLine.split(SPLIT_PARAM, 3);
         String group = null;
@@ -329,19 +344,6 @@ public class SmdExecutor extends ParamParserService {
         }
     }
 
-    /**
-     * 添加指令前缀替换
-     *
-     * @param name    指令前缀
-     * @param aliases 指令替换字符
-     */
-    @SmdOption(value = {"addPrefixReplace", "prefix"}, description = "添加指令前缀替换，适合设置指令别名或快捷指令", example = "prefix plus \"plus 1 1\"")
-    public void addPrefixReplace(@SmdParam(value = "name", description = "指令前缀") String name, @SmdParam(value = "alias", description = "替换的指令字符串") String... aliases) {
-        for (String alias : aliases) {
-            prefixMap.put(alias, name);
-        }
-    }
-
     @Override
     @SmdOption(value = "parse", description = "解析字符串成对象，优先解析成变量", example = "parse com.demo.person person")
     public <T> T parse(@SmdParam(value = "cl", description = "对象类全名") Class<T> cl, @SmdParam(value = "param", description = "对象字符串") String param) {
@@ -352,17 +354,6 @@ public class SmdExecutor extends ParamParserService {
             return (T) varsMap.get(param.substring(2, length - 1));
         }
         return super.parse(cl, param);
-    }
-
-    /**
-     * 获取指令本名
-     *
-     * @param alias 指令别名
-     * @return 指令本名
-     */
-    @SmdOption(value = {"getOriginalName", "originalName"}, description = "获取指令本名", example = "originalName plus")
-    public String getOriginalName(@SmdParam(value = "alias", description = "指令别名") String alias) {
-        return prefixMap.get(alias);
     }
 
     /**

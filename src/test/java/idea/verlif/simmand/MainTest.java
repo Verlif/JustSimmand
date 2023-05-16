@@ -4,8 +4,9 @@ import idea.verlif.justsimmand.LoadConfig;
 import idea.verlif.justsimmand.PointSmdLinkParser;
 import idea.verlif.justsimmand.SmdConfig;
 import idea.verlif.justsimmand.SmdExecutor;
-import idea.verlif.justsimmand.anno.SmdParam;
 import idea.verlif.justsimmand.info.SmdGroupInfo;
+import idea.verlif.justsimmand.pretreatment.AliasPretreatment;
+import idea.verlif.justsimmand.pretreatment.FilterPretreatment;
 import idea.verlif.simmand.domain.LinkA;
 import idea.verlif.simmand.domain.Math;
 import idea.verlif.simmand.domain.SimpleMath;
@@ -14,6 +15,8 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainTest {
 
@@ -23,9 +26,12 @@ public class MainTest {
         SmdExecutor smdExecutor = new SmdExecutor();
         // 添加指令对象
         smdExecutor.add(new Math());
-        // 设定指令前缀别名，这里表示输入 "3" 或 "test" 就相当于输入了 "math plus --b 4"
+        // 设定指令别名，这里表示输入 "3" 或 "test" 就相当于输入了 "math plus --b 4"
         // 这里的 "--b" 表示后面的 "4" 是属于参数 "b" 的
-        smdExecutor.addPrefixReplace("math plus --b 4", "3", "test");
+        AliasPretreatment aliasPretreatment = new AliasPretreatment();
+        aliasPretreatment.addAlias("math plus --b 4", "3", "test");
+        aliasPretreatment.addAlias("help help", "help");
+        smdExecutor.addPretreatment(aliasPretreatment);
         // 使用别名进行指令调用，这里因为 "a" 并不是强制参数且是基础类型，所以会给予默认值 "0"
         System.out.println("使用指令前缀别名: " + smdExecutor.execute("3")); // 结果是4
         // 这里同样因为 "b" 设定有默认值，所以也不需要输入 "b" 的值
@@ -42,7 +48,7 @@ public class MainTest {
     public void simpleTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         // 实例化指令执行器
         SmdExecutor smdExecutor = new SmdExecutor();
-        smdExecutor.getSmdConfig().setClassNameGroup(false);
+//        smdExecutor.getSmdConfig().setClassNameGroup(false);
         LoadConfig loadConfig = new LoadConfig().loadMode(LoadConfig.LoadMode.POSITIVE);
         // 加载对象到指令执行器，并设定加载模式为积极模式
         smdExecutor.add(new SimpleMath(), loadConfig);
@@ -51,7 +57,7 @@ public class MainTest {
         smdExecutor.add(smdExecutor, loadConfig); // 添加自己来试试
         // 开始执行方法
         // help
-        List<SmdGroupInfo> help = (List<SmdGroupInfo>) smdExecutor.execute("help");
+        List<SmdGroupInfo> help = (List<SmdGroupInfo>) smdExecutor.execute("help help");
         for (SmdGroupInfo groupInfo : help) {
             System.out.println(groupInfo);
         }
@@ -77,6 +83,8 @@ public class MainTest {
 
     @Test
     public void testForStr() {
-        System.out.println(String.format("#{%s}", "abc"));
+        Pattern pattern = Pattern.compile(".*help.*");
+        Matcher matcher = pattern.matcher("help help");
+        System.out.println(matcher.matches());
     }
 }

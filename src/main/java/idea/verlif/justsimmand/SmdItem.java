@@ -9,7 +9,10 @@ import idea.verlif.parser.cmdline.ArgValues;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 指令对象，由{@link SmdExecutor}自动生成。<br>
@@ -154,8 +157,9 @@ public abstract class SmdItem {
      * 指令执行
      *
      * @return 指令返回值
+     * @throws JustSmdException 反射运行出错抛出此异常
      */
-    public Object run(ArgValues argValues) throws InvocationTargetException, IllegalAccessException {
+    public Object run(ArgValues argValues) throws JustSmdException {
         Object[] params = new Object[keyMap.size()];
         // 构建参数数组
         Deque<String> noKeyValue = new ArrayDeque<>();
@@ -204,7 +208,11 @@ public abstract class SmdItem {
                 params[i] = convert(params[i].toString(), parameterTypes[i]);
             }
         }
-        return method.invoke(object, params);
+        try {
+            return method.invoke(object, params);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new JustSmdException(e);
+        }
     }
 
     /**
