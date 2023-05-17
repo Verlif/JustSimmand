@@ -14,11 +14,11 @@ import java.util.List;
 public class LoadConfig {
 
     /**
-     * 加载模式，默认 {@link LoadMode#NEGATIVE} 消极模式。
+     * 加载模式，默认只加载被 {@link SmdOption} 标记且 {@code ignored = true} 的方法。
      *
      * @see LoadMode
      */
-    private LoadMode loadMode = LoadMode.NEGATIVE;
+    private int loadMode = 0;
 
     /**
      * 允许的方法类型
@@ -40,19 +40,30 @@ public class LoadConfig {
      */
     private List<String> allowedList;
 
-    public LoadMode getLoadMode() {
+    public int getLoadMode() {
         return loadMode;
     }
 
-    public void setLoadMode(LoadMode loadMode) {
+    public void setLoadMode(int loadMode) {
         this.loadMode = loadMode;
+    }
+
+    /**
+     * 添加加载模式
+     *
+     * @param loadMode 加载模式
+     */
+    public void addLoadMode(LoadMode loadMode) {
+        this.loadMode |= this.loadMode | loadMode.code;
     }
 
     /**
      * @see #loadMode
      */
-    public LoadConfig loadMode(LoadMode loadMode) {
-        setLoadMode(loadMode);
+    public LoadConfig loadMode(LoadMode... loadModes) {
+        for (LoadMode mode : loadModes) {
+            addLoadMode(mode);
+        }
         return this;
     }
 
@@ -169,18 +180,39 @@ public class LoadConfig {
      * 加载模式。表示本次加载指令的方法。
      *
      * @see #POSITIVE
-     * @see #NEGATIVE
+     * @see #EXTEND
      */
     public enum LoadMode {
         /**
          * 积极模式，除了被 {@link SmdOption#ignored()} 指定为 {@code false} 的方法，其他的所有方法都加载。
          */
-        POSITIVE,
+        POSITIVE(1),
 
         /**
-         * 消极模式，只加载被 {@link SmdOption#ignored()} 指定为 {@code true} 的方法。
+         * 拓展模式，会加载父类方法。
          */
-        NEGATIVE
+        EXTEND(2),
+        ;
+
+        private final int code;
+
+        LoadMode(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        /**
+         * 此模式是否能匹配到模式值
+         *
+         * @param code 模式值
+         * @return 是否匹配
+         */
+        public boolean matches(int code) {
+            return (this.code & code) == this.code;
+        }
     }
 
 }

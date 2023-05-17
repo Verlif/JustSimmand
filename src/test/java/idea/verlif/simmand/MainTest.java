@@ -6,13 +6,11 @@ import idea.verlif.justsimmand.SmdConfig;
 import idea.verlif.justsimmand.SmdExecutor;
 import idea.verlif.justsimmand.info.SmdGroupInfo;
 import idea.verlif.justsimmand.pretreatment.AliasPretreatment;
-import idea.verlif.justsimmand.pretreatment.FilterPretreatment;
 import idea.verlif.simmand.domain.LinkA;
 import idea.verlif.simmand.domain.Math;
 import idea.verlif.simmand.domain.SimpleMath;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -21,7 +19,7 @@ import java.util.regex.Pattern;
 public class MainTest {
 
     @Test
-    public void test() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public void test() throws NoSuchMethodException {
         // 实例化指令执行器
         SmdExecutor smdExecutor = new SmdExecutor();
         // 添加指令对象
@@ -45,11 +43,11 @@ public class MainTest {
     }
 
     @Test
-    public void simpleTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public void simpleTest() throws NoSuchMethodException {
         // 实例化指令执行器
         SmdExecutor smdExecutor = new SmdExecutor();
 //        smdExecutor.getSmdConfig().setClassNameGroup(false);
-        LoadConfig loadConfig = new LoadConfig().loadMode(LoadConfig.LoadMode.POSITIVE);
+        LoadConfig loadConfig = new LoadConfig().loadMode(LoadConfig.LoadMode.POSITIVE, LoadConfig.LoadMode.EXTEND);
         // 加载对象到指令执行器，并设定加载模式为积极模式
         smdExecutor.add(new SimpleMath(), loadConfig);
         smdExecutor.add(new LinkA(), loadConfig);

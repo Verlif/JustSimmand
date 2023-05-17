@@ -30,12 +30,13 @@ At this point we can call both methods by:
 ```java
 public class MainTest {
     @Test
-    public void simpleTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public void simpleTest() throws NoSuchMethodException {
         // Instantiating instruction executors
         SmdExecutor smdExecutor = new SmdExecutor();
-        // Load the object to the command executor and set the load mode to positive mode
-        smdExecutor.add(new SimpleMath(), new LoadConfig()
-                .loadMode(LoadConfig.LoadMode.POSITIVE));
+        // Load the object to the command executor and set the load mode to positive mode and extend mode
+        smdExecutor.add(
+                new SimpleMath(),
+                new LoadConfig().loadMode(LoadConfig.LoadMode.POSITIVE, LoadConfig.LoadMode.EXTEND));
         // Start execution method
         System.out.println("plus : " + smdExecutor.execute("SimpleMath plus 2 3"));
         System.out.println("square : " + smdExecutor.execute("SimpleMath square 2"));
@@ -92,7 +93,7 @@ And you can also use it like this:
 public class MainTest {
 
     @Test
-    public void test() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public void test() throws NoSuchMethodException {
         // Instantiating instruction executors
         SmdExecutor smdExecutor = new SmdExecutor();
         // Add command object

@@ -30,12 +30,13 @@ public class SimpleMath {
 ```java
 public class MainTest {
     @Test
-    public void simpleTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public void simpleTest() throws NoSuchMethodException {
         // 实例化指令执行器
         SmdExecutor smdExecutor = new SmdExecutor();
         // 加载对象到指令执行器，并设定加载模式为积极模式
-        smdExecutor.add(new SimpleMath(), new LoadConfig()
-                .loadMode(LoadConfig.LoadMode.POSITIVE));
+        smdExecutor.add(
+                new SimpleMath(),
+                new LoadConfig().loadMode(LoadConfig.LoadMode.POSITIVE, LoadConfig.LoadMode.EXTEND));
         // 开始执行方法
         System.out.println("plus : " + smdExecutor.execute("SimpleMath plus 2 3"));
         System.out.println("square : " + smdExecutor.execute("SimpleMath square 2"));
@@ -91,7 +92,7 @@ public class Math {
 public class MainTest {
 
     @Test
-    public void test() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public void test() throws NoSuchMethodException {
         // 实例化指令执行器
         SmdExecutor smdExecutor = new SmdExecutor();
         // 添加指令对象

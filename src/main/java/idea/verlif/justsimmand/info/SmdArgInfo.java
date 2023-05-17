@@ -23,7 +23,7 @@ public class SmdArgInfo {
     /**
      * 参数是否必填
      */
-    private boolean force;
+    private boolean force = true;
 
     public String getKey() {
         return key;

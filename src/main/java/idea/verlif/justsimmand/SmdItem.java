@@ -83,10 +83,14 @@ public abstract class SmdItem {
     public boolean load(Object o, Method method) {
         methodInfo = new SmdMethodInfo();
         SmdOption smdOption = method.getAnnotation(SmdOption.class);
-        // 当没有SmdOption注解且当前配置为被动加载时，不加载此方法
         // 当有SmdOption注解且当前配置为主动加载且标明此方法不加载时，不加载此方法
-        if (config.getLoadMode() == LoadConfig.LoadMode.POSITIVE && smdOption != null && smdOption.ignored()
-                || config.getLoadMode() == LoadConfig.LoadMode.NEGATIVE && smdOption == null) {
+        int loadMode = config.getLoadMode();
+        if ((smdOption == null && !LoadConfig.LoadMode.POSITIVE.matches(loadMode))
+                || (LoadConfig.LoadMode.POSITIVE.matches(loadMode) && smdOption != null && smdOption.ignored())) {
+            return false;
+        }
+        // 判断加载非本身声明的方法
+        if (o.getClass() != method.getDeclaringClass() && !LoadConfig.LoadMode.EXTEND.matches(loadMode)) {
             return false;
         }
         this.object = o;
