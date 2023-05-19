@@ -128,11 +128,12 @@ public abstract class SmdItem {
                 if (smdParam.defaultVal().length() > 0) {
                     valueMap.put(i, convert(smdParam.defaultVal(), parameterTypes[i]));
                     smdArgInfo.setDefaultVal(smdParam.defaultVal());
-                    if (smdParam.value().length() > 0) {
-                        paramKey = smdParam.value();
-                    }
                 } else if (smdParam.force()) {
                     valueMap.put(i, ForceValue.class);
+                }
+                // 设置参数名称
+                if (smdParam.value().length() > 0) {
+                    paramKey = smdParam.value();
                 }
             } else {
                 valueMap.put(i, null);
