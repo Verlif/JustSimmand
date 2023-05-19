@@ -21,6 +21,11 @@ public class SmdArgInfo {
     private String defaultVal;
 
     /**
+     * 参数类型
+     */
+    private Class<?> type;
+
+    /**
      * 参数是否必填
      */
     private boolean force = true;
@@ -49,6 +54,14 @@ public class SmdArgInfo {
         this.defaultVal = defaultVal;
     }
 
+    public Class<?> getType() {
+        return type;
+    }
+
+    public void setType(Class<?> type) {
+        this.type = type;
+    }
+
     public boolean isForce() {
         return force;
     }
@@ -62,6 +75,7 @@ public class SmdArgInfo {
         smdArgInfo.key = this.key;
         smdArgInfo.description = this.description;
         smdArgInfo.force = this.force;
+        smdArgInfo.type = this.type;
         smdArgInfo.defaultVal = this.defaultVal;
         return smdArgInfo;
     }

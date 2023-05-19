@@ -85,28 +85,44 @@ public class SmdGroupInfo {
                 // 遍历指令方法参数
                 for (SmdArgInfo smdArgInfo : methodInfo.getArgInfoList()) {
                     String argName = smdArgInfo.getKey();
+                    str.append("\t\t");
                     // 强制需要的参数显示为 *arg* , 否则显示为 [arg]
+                    str.append(argName).append(" (");
                     if (smdArgInfo.isForce()) {
-                        argName = "*" + argName + "*";
-                    } else {
-                        argName = "[" + argName + "]";
+                        str.append("required");
                     }
-                    str.append("\t\t").append(fillSpace(20, argName)).append("\t");
                     // 显示默认值
-                    if (smdArgInfo.getDefaultVal() == null) {
-                        str.append(fillSpace(20, "_NULL_")).append("\t");
-                    } else {
-                        str.append(fillSpace(20, smdArgInfo.getDefaultVal())).append("\t");
+                    if (smdArgInfo.getDefaultVal() != null) {
+                        str.append(" | ").append(smdArgInfo.getDefaultVal());
                     }
+                    if (str.charAt(str.length() - 1) != '(') {
+                        str.append(")");
+                    } else {
+                        str.setLength(str.length() - 1);
+                    }
+                    str.append(", ");
+                    // 显示参数类型
+                    str.append(typeString(smdArgInfo.getType()));
                     if (smdArgInfo.getDescription() == null) {
                         str.append("\n");
                     } else {
-                        str.append(smdArgInfo.getDescription()).append("\n");
+                        str.append(" -> ").append(smdArgInfo.getDescription()).append("\n");
                     }
                 }
             }
         }
         return str.toString();
+    }
+
+    private String typeString(Class<?> type) {
+        if (type == null) {
+            return "UNKNOWN";
+        }
+        if (type.isArray()) {
+            return typeString(type.getComponentType()) + "[]";
+        } else {
+            return type.getSimpleName();
+        }
     }
 
     private String fillSpace(int total, String str) {

@@ -118,6 +118,7 @@ public abstract class SmdItem {
             Parameter parameter = parameters[i];
             String paramKey = parameter.getName();
             SmdArgInfo smdArgInfo = new SmdArgInfo();
+            smdArgInfo.setType(parameter.getType());
             SmdParam smdParam = parameter.getAnnotation(SmdParam.class);
             if (smdParam != null) {
                 // 设置参数属性
